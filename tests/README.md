@@ -44,3 +44,5 @@ npm run test:e2e
 - 回归用例通过 `?intro=off` 隔离开场动画；开场解锁由独立用例覆盖。
 - 滚动补偿来自 `src/navigation/siteScroll.js`，测试与 VitePress 配置共用同一常量。
 - 资源审计只统计浏览器可观察的任务与轮播监听器，不等于逐一验证 Three.js 内部资源。
+
+GitHub Actions 的 `Quality checks` 工作流会在推送和 Pull Request 时执行生产构建与完整浏览器回归；失败时自动上传 trace、截图和录屏。
