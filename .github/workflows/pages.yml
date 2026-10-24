@@ -37,7 +37,8 @@ jobs:
       - name: Build site
         run: npm run build
         env:
-          SITE_BASE: /YuanXingWebsite/
+          SITE_BASE: /
+          SITE_ORIGIN: https://ourselves.cv
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

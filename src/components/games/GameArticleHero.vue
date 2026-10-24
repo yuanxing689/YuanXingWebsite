@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { withBase } from 'vitepress'
+import { toSiteHref } from '../../navigation/sitePaths.js'
 import { getGameStatusLabel } from './gameStatus.js'
 
 const props = defineProps({
@@ -41,7 +41,7 @@ const statusLabel = computed(
         <img
           v-if="frontmatter.cover"
           class="game-article-hero__cover"
-          :src="withBase(frontmatter.cover)"
+          :src="toSiteHref(frontmatter.cover)"
           :alt="`${title} 封面`"
           decoding="async"
           fetchpriority="high"

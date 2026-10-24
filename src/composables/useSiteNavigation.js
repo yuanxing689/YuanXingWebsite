@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import { withBase } from 'vitepress'
+import { toSiteHref } from '../navigation/sitePaths.js'
 
 const MOBILE_BREAKPOINT = 680
 const DESKTOP_NAVIGATION_CENTER_Y = 45
@@ -68,7 +68,7 @@ export function useSiteNavigation({
       return {
         id: section.id,
         label: section.label,
-        href: withBase(`/#${section.id}`),
+        href: toSiteHref(`/#${section.id}`),
         active: isHome.value && activeSection.value === section.id,
         x,
         y: yPixels / Math.max(height, 1)

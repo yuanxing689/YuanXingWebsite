@@ -80,8 +80,9 @@ npm run preview
 具体职责已拆分到：
 
 - `useIntroController.js`：开场加载、锁定、降级和场景状态。
-- `useHomeScrollState.js`：唯一的首页滚动/缩放监听、视口和章节状态。
+- `useHomeScrollState.js`：唯一的首页滚动、可视视口和章节状态监听来源。
 - `useSiteRouteTransitions.js`：品牌首页、章节导航、游戏返回和浏览器后退。
+- `navigation/sitePaths.js`：站内路径、站点 base 和浏览器最终地址的唯一转换入口。
 - `brandGeometry.js`：品牌 LOGO、锚点和字标的纯几何计算。
 
 组件本身尽量不直接承担路由和全站状态。新增功能时优先扩展对应模块，不再向 Layout 堆叠监听器和业务分支。
@@ -90,6 +91,7 @@ npm run preview
 
 - `src/components/navigation/SiteHeader.vue`：品牌、导航链接、毛玻璃和降级星。
 - `src/composables/useSiteNavigation.js`：导航标签、链接和归一化坐标。
+- `src/navigation/sitePaths.js`：生成带 base 的最终地址，并提供跨部署状态的规范路径。
 - `src/components/LogoHero.vue` + `src/three/logoScene.js`：首页完整 3D 场景。
 - `src/components/navigation/NavigationStarCanvas.vue` + `src/three/navigationScene.js`：详情页导航专用 3D 场景。
 
@@ -152,7 +154,7 @@ order: 20
 - `order` 越小越靠前。
 - 正文直接写普通 Markdown，不要重复写二级标题。
 
-首页图片和链接使用站点绝对路径，例如 `/images/home/team.webp`。
+首页图片和链接使用站内绝对路径，例如 `/images/home/team.webp`。不要写入部署目录；页面组件通过 `toSiteHref()` 补 base，首页 Markdown 图片由构建配置统一处理。
 
 ### 新增游戏
 
@@ -304,9 +306,10 @@ npm run build
 - `cleanUrls: true` 使用无 `.html` 的干净 URL。
 - 构建产物写入仓库的忽略目录。
 - `srcExclude: ['home/**', 'games/README.md']` 阻止首页内容片段和游戏维护说明成为公开路由。
-- `sitemap.hostname` 使用正式域名 `https://ourselves.cv/`，并与 `SITE_BASE` 组合生成 sitemap URL。
+- GitHub Pages 使用 Actions 发布方式，正式域名在仓库 Pages 设置中配置。
+- `sitemap.hostname` 使用正式域名 `https://ourselves.cv/`，并与 `SITE_BASE` 组合生成页面 URL。
 
-正式站点默认使用根路径 `https://ourselves.cv/`。部署时发布构建产物目录；如未来改为子路径部署，通过 `SITE_BASE` 注入 base：
+正式站点使用根域名 `https://ourselves.cv/`，构建时设置 `SITE_BASE=/`。如以后临时使用项目页地址，再通过 `SITE_BASE` 注入仓库路径：
 
 ```bash
 SITE_BASE=/yuanxing-website/ npm run build

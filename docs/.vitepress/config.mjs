@@ -1,7 +1,15 @@
 import { defineConfig } from 'vitepress'
+import { createSiteImagePlugin } from './markdown/siteImages.js'
 
 const siteBase = process.env.SITE_BASE || '/'
 const normalizedBase = siteBase.endsWith('/') ? siteBase : `${siteBase}/`
+const siteOrigin = (
+  process.env.SITE_ORIGIN || 'https://ourselves.cv'
+).replace(/\/+$/, '')
+const sitemapHostname = new URL(
+  normalizedBase,
+  `${siteOrigin}/`
+).href
 
 export default defineConfig({
   base: normalizedBase,
@@ -12,6 +20,12 @@ export default defineConfig({
   srcExclude: ['home/**', 'games/README.md'],
   outDir: '../dist',
   scrollOffset: 88,
+  markdown: {
+    config: createSiteImagePlugin(normalizedBase)
+  },
+  sitemap: {
+    hostname: sitemapHostname
+  },
   head: [
     [
       'link',

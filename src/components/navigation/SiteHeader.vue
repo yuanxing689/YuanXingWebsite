@@ -273,6 +273,14 @@ function getItemStyle(item) {
 }
 
 @media (max-width: 680px) {
+  .star-navigation {
+    top: 0;
+    right: 0;
+    bottom: auto;
+    left: 0;
+    height: var(--site-viewport-height, 100svh);
+  }
+
   .brand-glass {
     position: fixed;
     z-index: 2;
@@ -293,9 +301,9 @@ function getItemStyle(item) {
   }
 
   .star-navigation-glass {
-    top: auto;
+    top: calc(var(--site-viewport-height, 100svh) - 116px);
     right: 12px;
-    bottom: 12px;
+    bottom: auto;
     left: 12px;
     height: 104px;
     border-radius: 24px;

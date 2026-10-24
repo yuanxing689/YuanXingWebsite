@@ -5,7 +5,7 @@ import {
   ref,
   watch
 } from 'vue'
-import { useRouter, withBase } from 'vitepress'
+import { useRouter } from 'vitepress'
 import {
   beginGameReturn,
   endGameReturn,
@@ -14,6 +14,10 @@ import {
   rememberActiveGame,
   waitForGameCarouselReady
 } from '../components/games/gameCarouselState.js'
+import {
+  normalizeSitePath,
+  toSiteHref
+} from '../navigation/sitePaths.js'
 import { getScrollTargetTop } from './usePageSectionSnap.js'
 import { useViewTransitionNavigation } from './useViewTransitionNavigation.js'
 
@@ -36,11 +40,6 @@ export function useSiteRouteTransitions({
     transitionExistingNavigation
   } = useViewTransitionNavigation()
   let previousScrollRestoration = 'auto'
-
-  function normalizeSitePath(pathname) {
-    const path = String(pathname || '/').replace(/\/+$/, '')
-    return `${path}/`
-  }
 
   watch(isGamePage, (gamePage) => {
     if (gamePage && typeof window !== 'undefined') {
@@ -226,7 +225,7 @@ export function useSiteRouteTransitions({
     beginGameReturn(getGameCardKey({ url: route.path }))
 
     try {
-      await navigateWithTransition(withBase('/#games'), {
+      await navigateWithTransition(toSiteHref('/#games'), {
         afterRouteChange: async () => {
           await restoreHomeAnchor('games')
           await waitForGameCarouselReady()
@@ -312,13 +311,13 @@ export function useSiteRouteTransitions({
 
       event.preventDefault()
       event.stopPropagation()
-      scrollToSection(hero, withBase('/'))
+      scrollToSection(hero, toSiteHref('/'))
       return
     }
 
     event.preventDefault()
     event.stopPropagation()
-    await leaveHomeTo(withBase('/'))
+    await leaveHomeTo(toSiteHref('/'))
   }
 
   onMounted(() => {
