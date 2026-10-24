@@ -1,6 +1,7 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useData, useRoute, withBase } from 'vitepress'
+import { useData, useRoute } from 'vitepress'
+import { toSiteHref } from '../navigation/sitePaths.js'
 
 const route = useRoute()
 const { site } = useData()
@@ -62,11 +63,11 @@ onBeforeUnmount(() => {
     <div class="not-found__actions">
       <a
         class="not-found__button not-found__button--primary"
-        :href="withBase('/')"
+        :href="toSiteHref('/')"
       >
         返回首页
       </a>
-      <a class="not-found__button" :href="withBase('/#games')">
+      <a class="not-found__button" :href="toSiteHref('/#games')">
         浏览游戏目录
       </a>
     </div>

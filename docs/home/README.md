@@ -104,6 +104,8 @@ Markdown 使用站点绝对路径：
 ![汉化组成员](/images/home/team.webp)
 ```
 
+这里的 `/images/...` 是站内规范路径，构建时由 Markdown 渲染配置自动追加 `SITE_BASE`；不要在内容中写部署目录。
+
 不要使用相对于 `docs/home/` 的路径。`docs/home/**` 被 VitePress 排除为独立路由，首页图片通过 `docs/public/` 提供最稳定。
 
 建议：

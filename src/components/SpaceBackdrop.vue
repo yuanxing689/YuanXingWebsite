@@ -1,7 +1,15 @@
+<script setup>
+import { toSiteHref } from '../navigation/sitePaths.js'
+
+const trackStyle = {
+  backgroundImage: `url("${toSiteHref('/assets/space-bg-mirror.webp')}")`
+}
+</script>
+
 <template>
   <div class="space-backdrop" aria-hidden="true">
     <div class="space-backdrop__tint" />
-    <div class="space-backdrop__track" />
+    <div class="space-backdrop__track" :style="trackStyle" />
     <div class="space-backdrop__veil" />
   </div>
 </template>
@@ -27,7 +35,6 @@
   position: absolute;
   inset: 0;
   min-height: 100%;
-  background-image: url('/assets/space-bg-mirror.webp');
   background-position: center top;
   background-repeat: repeat-y;
   background-size: 100% auto;

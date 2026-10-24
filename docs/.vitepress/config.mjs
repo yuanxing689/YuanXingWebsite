@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitepress'
+import { createSiteImagePlugin } from './markdown/siteImages.js'
 
 const siteBase = process.env.SITE_BASE || '/'
 const normalizedBase = siteBase.endsWith('/') ? siteBase : `${siteBase}/`
@@ -19,6 +20,9 @@ export default defineConfig({
   srcExclude: ['home/**', 'games/README.md'],
   outDir: '../dist',
   scrollOffset: 88,
+  markdown: {
+    config: createSiteImagePlugin(normalizedBase)
+  },
   sitemap: {
     hostname: sitemapHostname
   },

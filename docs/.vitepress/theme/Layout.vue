@@ -6,7 +6,7 @@ import {
   ref,
   watch
 } from 'vue'
-import { useData, useRoute, withBase } from 'vitepress'
+import { useData, useRoute } from 'vitepress'
 // 直接引用 Content，避免 data loader 与 VitePress 公共入口形成循环 chunk。
 import { Content } from 'vitepress/dist/client/app/components/Content.js'
 import BrandWordmark from '../../../src/components/BrandWordmark.vue'
@@ -22,6 +22,10 @@ import { useIntroController } from '../../../src/composables/useIntroController.
 import { useSiteRouteTransitions } from '../../../src/composables/useSiteRouteTransitions.js'
 import { useSiteNavigation } from '../../../src/composables/useSiteNavigation.js'
 import { getBrandGeometry } from '../../../src/layout/brandGeometry.js'
+import {
+  normalizeSitePath,
+  toSiteHref
+} from '../../../src/navigation/sitePaths.js'
 
 const LogoHero = defineAsyncComponent(() => import('../../../src/components/LogoHero.vue'))
 
@@ -33,12 +37,7 @@ const wordmarkRef = ref(null)
 const navigationSceneReady = ref(false)
 const navigationSceneFailed = ref(false)
 
-function normalizeSitePath(pathname) {
-  const path = String(pathname || '/').replace(/\/+$/, '')
-  return `${path}/`
-}
-
-const siteHomePath = computed(() => normalizeSitePath(withBase('/')))
+const siteHomePath = computed(() => normalizeSitePath(toSiteHref('/')))
 const isHome = computed(() => {
   const homePath = siteHomePath.value
   if (normalizeSitePath(route.path) === homePath) return true
@@ -189,8 +188,8 @@ onMounted(async () => {
       :home="isHome"
       :brand-ready="brandReady"
       :brand-style="brandHomeStyle"
-      :brand-href="withBase('/')"
-      :brand-mark-src="withBase('/images/brand/logo-mark.png')"
+      :brand-href="toSiteHref('/')"
+      :brand-mark-src="toSiteHref('/images/brand/logo-mark.png')"
       :wordmark-style="wordmarkStyle"
       :glass-visible="navigationGlassVisible"
       :locked="introLocked"
@@ -219,7 +218,7 @@ onMounted(async () => {
           <div ref="heroAnchorRef" class="hero-logo-anchor" :style="heroAnchorStyle" />
           <img
             class="hero-logo-replacement"
-            :src="withBase('/images/brand/logo-mark.png')"
+            :src="toSiteHref('/images/brand/logo-mark.png')"
             :style="[heroAnchorStyle, { opacity: logoReplacementProgress }]"
             alt=""
             aria-hidden="true"

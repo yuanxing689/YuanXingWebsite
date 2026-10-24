@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { toSitePath } from '../../navigation/sitePaths.js'
 
 const ACTIVE_GAME_KEY = 'yuanxing:active-game'
 const RETURN_READY_TIMEOUT = 300
@@ -10,34 +11,30 @@ let returnReadyPromise = Promise.resolve()
 
 export function getGameCardKey(game) {
   const gameKey = game?.url || game?.id || game?.title || ''
-
-  try {
-    return decodeURI(gameKey)
-  } catch {
-    return gameKey
-  }
+  return toSitePath(gameKey)
 }
 
 export function readActiveGameKey() {
   try {
-    return window.sessionStorage.getItem(ACTIVE_GAME_KEY) || ''
+    return toSitePath(window.sessionStorage.getItem(ACTIVE_GAME_KEY) || '')
   } catch {
     return ''
   }
 }
 
 export function rememberActiveGame(gameKey) {
-  if (!gameKey) return
+  const normalizedKey = toSitePath(gameKey)
+  if (!normalizedKey) return
 
   try {
-    window.sessionStorage.setItem(ACTIVE_GAME_KEY, gameKey)
+    window.sessionStorage.setItem(ACTIVE_GAME_KEY, normalizedKey)
   } catch {
     // 存储不可用时保持当前会话行为
   }
 }
 
 export function beginGameReturn(gameKey) {
-  returningGameKey.value = gameKey
+  returningGameKey.value = toSitePath(gameKey)
   returnReadyPromise = new Promise((resolve) => {
     resolveReturnReady = resolve
   })

@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { withBase } from 'vitepress'
 import { useViewTransitionNavigation } from '../../composables/useViewTransitionNavigation.js'
+import { toSiteHref } from '../../navigation/sitePaths.js'
 import { getGameStatusLabel } from './gameStatus.js'
 import {
   getGameCardKey,
@@ -66,7 +66,7 @@ function handleNavigate(event) {
 
   rememberActiveGame(getGameCardKey(props.game))
   event.preventDefault()
-  navigate(withBase(props.game.url)).finally(() => {
+  navigate(toSiteHref(props.game.url)).finally(() => {
     transitionElements.forEach(([element]) => {
       element?.style.removeProperty('view-transition-name')
     })
@@ -77,7 +77,7 @@ function handleNavigate(event) {
 <template>
   <a
     class="game-card__link"
-    :href="withBase(game.url)"
+    :href="toSiteHref(game.url)"
     :aria-current="active ? 'true' : undefined"
     @click="handleNavigate"
   >
@@ -90,7 +90,7 @@ function handleNavigate(event) {
         <img
           v-if="game.cover"
           class="game-card__cover"
-          :src="withBase(game.cover)"
+          :src="toSiteHref(game.cover)"
           :alt="`${game.title} 封面`"
           loading="lazy"
           decoding="async"
