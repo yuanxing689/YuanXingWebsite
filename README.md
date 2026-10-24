@@ -80,7 +80,7 @@ npm run preview
 具体职责已拆分到：
 
 - `useIntroController.js`：开场加载、锁定、降级和场景状态。
-- `useHomeScrollState.js`：唯一的首页滚动/缩放监听、视口和章节状态。
+- `useHomeScrollState.js`：唯一的首页滚动、可视视口和章节状态监听来源。
 - `useSiteRouteTransitions.js`：品牌首页、章节导航、游戏返回和浏览器后退。
 - `navigation/sitePaths.js`：站内路径、站点 base 和浏览器最终地址的唯一转换入口。
 - `brandGeometry.js`：品牌 LOGO、锚点和字标的纯几何计算。

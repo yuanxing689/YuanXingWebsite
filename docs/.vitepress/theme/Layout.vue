@@ -64,6 +64,7 @@ const {
 })
 const {
   viewport,
+  navigationViewport,
   scrollProgress,
   logoReplacementProgress,
   activeSection,
@@ -101,7 +102,7 @@ const {
   glassVisible: navigationGlassVisible
 } = useSiteNavigation({
   sections: homeSections,
-  viewport,
+  viewport: navigationViewport,
   scrollProgress,
   isHome,
   activeSection
@@ -176,6 +177,7 @@ onMounted(async () => {
 <template>
   <div
     class="site-shell"
+    :style="{ '--site-viewport-height': `${navigationViewport.height}px` }"
     :class="{
       'site-shell--home': isHome,
       'site-shell--route-leaving': routeLeaving

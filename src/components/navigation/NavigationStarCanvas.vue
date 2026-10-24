@@ -46,7 +46,7 @@ onBeforeUnmount(() => {
   inset: 0;
   display: block;
   width: 100%;
-  height: 100%;
+  height: var(--site-viewport-height, 100%);
   pointer-events: none;
 }
 </style>

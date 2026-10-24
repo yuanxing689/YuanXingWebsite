@@ -104,8 +104,7 @@ html.game-route-transitioning .game-article-body {
   z-index: 0 !important;
   inset: 0;
   width: 100vw !important;
-  height: 100vh !important;
-  height: 100svh !important;
+  height: var(--site-viewport-height, 100vh) !important;
   max-height: none !important;
   margin: 0 !important;
   pointer-events: none;

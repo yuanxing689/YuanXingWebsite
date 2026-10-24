@@ -7,6 +7,7 @@ import {
 
 export function useHomeScrollState({ isHome }) {
   const viewport = ref({ width: 1440, height: 900 })
+  const navigationViewport = ref({ width: 1440, height: 900 })
   const scrollProgress = ref(0)
   const logoReplacementProgress = ref(0)
   const activeSection = ref('')
@@ -16,6 +17,10 @@ export function useHomeScrollState({ isHome }) {
     viewport.value = {
       width: window.innerWidth,
       height: window.innerHeight
+    }
+    navigationViewport.value = {
+      width: window.visualViewport?.width ?? window.innerWidth,
+      height: window.visualViewport?.height ?? window.innerHeight
     }
   }
 
@@ -85,12 +90,23 @@ export function useHomeScrollState({ isHome }) {
   onMounted(() => {
     window.addEventListener('scroll', scheduleLayoutRefresh, { passive: true })
     window.addEventListener('resize', scheduleLayoutRefresh)
+    window.visualViewport?.addEventListener(
+      'resize',
+      scheduleLayoutRefresh
+    )
+    window.visualViewport?.addEventListener(
+      'scroll',
+      scheduleLayoutRefresh,
+      { passive: true }
+    )
     refreshLayout()
   })
 
   onBeforeUnmount(() => {
     window.removeEventListener('scroll', scheduleLayoutRefresh)
     window.removeEventListener('resize', scheduleLayoutRefresh)
+    window.visualViewport?.removeEventListener('resize', scheduleLayoutRefresh)
+    window.visualViewport?.removeEventListener('scroll', scheduleLayoutRefresh)
 
     if (scrollFrame) {
       window.cancelAnimationFrame(scrollFrame)
@@ -100,6 +116,7 @@ export function useHomeScrollState({ isHome }) {
 
   return {
     viewport,
+    navigationViewport,
     scrollProgress,
     logoReplacementProgress,
     activeSection,
