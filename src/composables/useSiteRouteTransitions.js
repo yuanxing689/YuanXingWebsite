@@ -30,13 +30,15 @@ export function useSiteRouteTransitions({
   scrollOffset = 0,
   refreshHomeScrollState = () => {},
   suspendHomeAlignment = () => {},
-  resumeHomeAlignment = () => {}
+  resumeHomeAlignment = () => {},
+  homeHistory
 }) {
   const routeLeaving = ref(false)
   const gameReturnPending = ref(false)
   const router = useRouter()
   const { navigate: navigateWithTransition } = useViewTransitionNavigation()
   let previousScrollRestoration = 'auto'
+  let previousBeforeRouteChange = null
   let previousBeforePageLoad = null
 
   watch(isGamePage, (gamePage) => {
@@ -173,17 +175,20 @@ export function useSiteRouteTransitions({
     const gameKey = readActiveGameKey()
     if (!gameKey) return
 
+    const returnAnchor = window.location.hash || '#games'
     gameReturnPending.value = true
     suspendHomeAlignment()
+    homeHistory.suspend()
     beginGameReturn(gameKey)
 
     void navigateWithTransition(window.location.href, {
       preempt: true,
       afterRouteChange: async () => {
-        await restoreHomeAnchor('games')
+        await restoreHomeAnchor(returnAnchor)
         await waitForGameCarouselReady()
-        await restoreHomeAnchor('games')
+        await restoreHomeAnchor(returnAnchor)
         await nextTick()
+        homeHistory.resume()
       }
     }).catch(() => {
       // 路由更新失败时由 VitePress 的下一次页面加载恢复
@@ -191,6 +196,7 @@ export function useSiteRouteTransitions({
       endGameReturn()
       gameReturnPending.value = false
       resumeHomeAlignment()
+      homeHistory.resume()
     })
 
     // 阻止 VitePress 在旧页面状态下先完成这次返回。
@@ -201,6 +207,7 @@ export function useSiteRouteTransitions({
     if (gameReturnPending.value) return
     gameReturnPending.value = true
     suspendHomeAlignment()
+    homeHistory.suspend()
     beginGameReturn(getGameCardKey({ url: route.path }))
 
     try {
@@ -210,12 +217,14 @@ export function useSiteRouteTransitions({
           await waitForGameCarouselReady()
           await restoreHomeAnchor('games')
           await nextTick()
+          homeHistory.resume()
         },
         onFinished: endGameReturn
       })
     } finally {
       gameReturnPending.value = false
       resumeHomeAlignment()
+      homeHistory.resume()
     }
   }
 
@@ -223,6 +232,7 @@ export function useSiteRouteTransitions({
     if (routeLeaving.value) return
 
     suspendHomeAlignment()
+    homeHistory.suspend()
     routeLeaving.value = true
     await new Promise((resolve) => window.setTimeout(resolve, 180))
 
@@ -232,11 +242,25 @@ export function useSiteRouteTransitions({
       await restoreHomeAnchor()
       await waitForStableHomeAnchor()
       await restoreHomeAnchor()
+      homeHistory.resume()
     } finally {
       resumeHomeAlignment()
       window.setTimeout(() => {
         routeLeaving.value = false
       }, 0)
+    }
+  }
+
+  function navigateToHomeSection(target, sectionId) {
+    homeHistory.pushSection(sectionId)
+    const started = scrollToSection(target, {
+      onFinished: (completed) => {
+        homeHistory.finishSectionNavigation(sectionId, completed)
+      }
+    })
+
+    if (!started) {
+      homeHistory.finishSectionNavigation(sectionId, false)
     }
   }
 
@@ -270,7 +294,7 @@ export function useSiteRouteTransitions({
 
     event.preventDefault()
     event.stopPropagation()
-    scrollToSection(target, item.href)
+    navigateToHomeSection(target, item.id)
   }
 
   async function handleHomeNavigation(event) {
@@ -290,7 +314,7 @@ export function useSiteRouteTransitions({
 
       event.preventDefault()
       event.stopPropagation()
-      scrollToSection(hero, toSiteHref('/'))
+      navigateToHomeSection(hero, '')
       return
     }
 
@@ -303,6 +327,13 @@ export function useSiteRouteTransitions({
     previousScrollRestoration = window.history.scrollRestoration
     window.history.scrollRestoration = 'manual'
 
+    previousBeforeRouteChange = router.onBeforeRouteChange
+    router.onBeforeRouteChange = async (href) => {
+      const previousResult = await previousBeforeRouteChange?.(href)
+      if (previousResult === false) return false
+      if (isHome.value) homeHistory.commitCurrentSection()
+    }
+
     previousBeforePageLoad = router.onBeforePageLoad
     router.onBeforePageLoad = async (href) => {
       const previousResult = await previousBeforePageLoad?.(href)
@@ -312,6 +343,7 @@ export function useSiteRouteTransitions({
   })
 
   onBeforeUnmount(() => {
+    router.onBeforeRouteChange = previousBeforeRouteChange
     router.onBeforePageLoad = previousBeforePageLoad
     window.history.scrollRestoration = previousScrollRestoration
   })

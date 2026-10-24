@@ -42,6 +42,7 @@ export function usePageSectionSnap({ enabled, scrollOffset = 0 }) {
   let stopEnabledWatch = null
   let isSnapping = false
   let alignmentSuspended = false
+  let activeSnapCallback = null
 
   function canSnap() {
     return (
@@ -62,7 +63,10 @@ export function usePageSectionSnap({ enabled, scrollOffset = 0 }) {
     idleTimer = window.setTimeout(alignNearestSection, IDLE_DELAY)
   }
 
-  function finishSnap() {
+  function finishSnap(completed = false) {
+    const onFinished = activeSnapCallback
+    activeSnapCallback = null
+
     if (snapFrame) {
       window.cancelAnimationFrame(snapFrame)
       snapFrame = 0
@@ -70,6 +74,7 @@ export function usePageSectionSnap({ enabled, scrollOffset = 0 }) {
 
     snapToken += 1
     isSnapping = false
+    onFinished?.(completed)
   }
 
   function cancelSnap() {
@@ -116,7 +121,12 @@ export function usePageSectionSnap({ enabled, scrollOffset = 0 }) {
     startSnap(nearest)
   }
 
-  function startSnap(target, minDuration = SNAP_MIN_DURATION, maxDuration = SNAP_MAX_DURATION) {
+  function startSnap(
+    target,
+    minDuration = SNAP_MIN_DURATION,
+    maxDuration = SNAP_MAX_DURATION,
+    onFinished = null
+  ) {
     finishSnap()
 
     const start = window.scrollY
@@ -129,6 +139,7 @@ export function usePageSectionSnap({ enabled, scrollOffset = 0 }) {
     const token = ++snapToken
 
     isSnapping = true
+    activeSnapCallback = onFinished
 
     const step = (timestamp) => {
       if (!isSnapping || token !== snapToken) return
@@ -146,12 +157,17 @@ export function usePageSectionSnap({ enabled, scrollOffset = 0 }) {
 
       snapFrame = 0
       isSnapping = false
+      const finish = activeSnapCallback
+      activeSnapCallback = null
+      finish?.(true)
     }
 
     snapFrame = window.requestAnimationFrame(step)
   }
 
-  function scrollToSection(target, href) {
+  function scrollToSection(target, {
+    onFinished = null
+  } = {}) {
     if (!enabled.value) return false
 
     const element =
@@ -160,17 +176,22 @@ export function usePageSectionSnap({ enabled, scrollOffset = 0 }) {
 
     clearIdleTimer()
     finishSnap()
-    if (href) window.history.pushState(null, '', href)
 
     const destination = getScrollTargetTop(element, scrollOffset)
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     if (reducedMotion || Math.abs(destination - window.scrollY) <= 1) {
       window.scrollTo({ top: destination, behavior: 'auto' })
+      onFinished?.(true)
       return true
     }
 
-    startSnap(destination, NAV_MIN_DURATION, NAV_MAX_DURATION)
+    startSnap(
+      destination,
+      NAV_MIN_DURATION,
+      NAV_MAX_DURATION,
+      onFinished
+    )
     return true
   }
 
