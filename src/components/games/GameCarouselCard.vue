@@ -78,6 +78,7 @@ function handleNavigate(event) {
   <a
     class="game-card__link"
     :href="toSiteHref(game.url)"
+    target="_self"
     :aria-current="active ? 'true' : undefined"
     @click="handleNavigate"
   >

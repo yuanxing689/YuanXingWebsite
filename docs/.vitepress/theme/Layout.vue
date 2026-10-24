@@ -16,6 +16,7 @@ import NotFoundPage from '../../../src/components/NotFoundPage.vue'
 import SiteHeader from '../../../src/components/navigation/SiteHeader.vue'
 import SpaceBackdrop from '../../../src/components/SpaceBackdrop.vue'
 import { data as homeSections } from '../data/home.data.js'
+import { useHomeHistory } from '../../../src/composables/useHomeHistory.js'
 import { usePageSectionSnap } from '../../../src/composables/usePageSectionSnap.js'
 import { useHomeScrollState } from '../../../src/composables/useHomeScrollState.js'
 import { useIntroController } from '../../../src/composables/useIntroController.js'
@@ -80,6 +81,10 @@ const {
   enabled: isHome,
   scrollOffset: siteScrollOffset
 })
+const homeHistory = useHomeHistory({
+  isHome,
+  activeSection
+})
 const {
   routeLeaving,
   restoreHomeAnchor,
@@ -94,7 +99,8 @@ const {
   scrollOffset: siteScrollOffset,
   refreshHomeScrollState: refreshLayout,
   suspendHomeAlignment: suspendAutoAlignment,
-  resumeHomeAlignment: resumeAutoAlignment
+  resumeHomeAlignment: resumeAutoAlignment,
+  homeHistory
 })
 
 const {
@@ -163,6 +169,7 @@ onMounted(async () => {
   if (isHome.value) {
     await restoreHomeAnchor()
     refreshLayout()
+    homeHistory.start()
   }
 
   if (isHome.value) {
