@@ -8,3 +8,5 @@ docs/.vitepress/cache/
 .env.*
 tools/
 .mimocode/
+playwright-report/
+test-results/
