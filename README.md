@@ -307,9 +307,9 @@ npm run build
 - 构建产物写入仓库的忽略目录。
 - `srcExclude: ['home/**', 'games/README.md']` 阻止首页内容片段和游戏维护说明成为公开路由。
 - GitHub Pages 使用 Actions 发布方式，正式域名在仓库 Pages 设置中配置。
-- `sitemap.hostname` 使用正式域名 `https://yxlb.tech/`，并与 `SITE_BASE` 组合生成页面 URL。
+- `sitemap.hostname` 使用正式域名 `https://ourselves.cv/`，并与 `SITE_BASE` 组合生成页面 URL。
 
-正式站点使用根域名 `https://yxlb.tech/`，构建时设置 `SITE_BASE=/`。如以后临时使用项目页地址，再通过 `SITE_BASE` 注入仓库路径：
+正式站点使用根域名 `https://ourselves.cv/`，构建时设置 `SITE_BASE=/`。如以后临时使用项目页地址，再通过 `SITE_BASE` 注入仓库路径：
 
 ```bash
 SITE_BASE=/yuanxing-website/ npm run build

@@ -4,7 +4,7 @@ import { createSiteImagePlugin } from './markdown/siteImages.js'
 const siteBase = process.env.SITE_BASE || '/'
 const normalizedBase = siteBase.endsWith('/') ? siteBase : `${siteBase}/`
 const siteOrigin = (
-  process.env.SITE_ORIGIN || 'https://yxlb.tech'
+  process.env.SITE_ORIGIN || 'https://ourselves.cv'
 ).replace(/\/+$/, '')
 const sitemapHostname = new URL(
   normalizedBase,

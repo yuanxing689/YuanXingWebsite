@@ -38,7 +38,7 @@ jobs:
         run: npm run build
         env:
           SITE_BASE: /
-          SITE_ORIGIN: https://yxlb.tech
+          SITE_ORIGIN: https://ourselves.cv
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
