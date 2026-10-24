@@ -241,6 +241,7 @@ export function useSiteRouteTransitions({
     beginGameReturn(getGameCardKey({ url: route.path }))
 
     try {
+      committingGameReturn = true
       await navigateWithTransition(toSiteHref('/#games'), {
         afterRouteChange: async () => {
           await restoreHomeAnchor('games')
@@ -252,6 +253,7 @@ export function useSiteRouteTransitions({
         onFinished: endGameReturn
       })
     } finally {
+      committingGameReturn = false
       gameReturnPending.value = false
       resumeHomeAlignment()
       homeHistory.resume()
