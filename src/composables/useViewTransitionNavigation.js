@@ -58,7 +58,8 @@ export function useViewTransitionNavigation() {
   async function navigate(href, {
     afterRouteChange = null,
     onFinished = null,
-    preempt = false
+    preempt = false,
+    shouldCommitRoute = null
   } = {}) {
     if (navigating && !preempt) return false
     navigating = true
@@ -66,10 +67,14 @@ export function useViewTransitionNavigation() {
     const reducedMotion = window.matchMedia(
       '(prefers-reduced-motion: reduce)'
     ).matches
+    let routeUpdated = false
     const updateRoute = async () => {
+      if (shouldCommitRoute && !shouldCommitRoute()) return false
       await router.go(href)
       await nextTick()
       await afterRouteChange?.()
+      routeUpdated = true
+      return true
     }
 
     if (reducedMotion) {
@@ -79,7 +84,7 @@ export function useViewTransitionNavigation() {
       } finally {
         finishNavigation(onFinished)
       }
-      return true
+      return routeUpdated
     }
 
     if (typeof document.startViewTransition === 'function') {
@@ -105,7 +110,7 @@ export function useViewTransitionNavigation() {
         document.documentElement.classList.remove(TRANSITIONING_CLASS)
         finishNavigation(onFinished)
       }
-      return true
+      return routeUpdated
     }
 
     await settleActiveTransition()
@@ -127,7 +132,7 @@ export function useViewTransitionNavigation() {
         finishNavigation(onFinished)
       }
     }
-    return false
+    return routeUpdated
   }
 
   return {

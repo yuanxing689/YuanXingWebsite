@@ -21,6 +21,8 @@ import {
 import { getScrollTargetTop } from './usePageSectionSnap.js'
 import { useViewTransitionNavigation } from './useViewTransitionNavigation.js'
 
+const RETURN_INPUT_SETTLE_MS = 100
+
 export function useSiteRouteTransitions({
   route,
   isHome,
@@ -40,6 +42,10 @@ export function useSiteRouteTransitions({
   let previousScrollRestoration = 'auto'
   let previousBeforeRouteChange = null
   let previousBeforePageLoad = null
+  let gameReturnTimer = 0
+  let pendingReturnHref = ''
+  let gameReturnRequestId = 0
+  let committingGameReturn = false
 
   watch(isGamePage, (gamePage) => {
     if (gamePage && typeof window !== 'undefined') {
@@ -58,6 +64,11 @@ export function useSiteRouteTransitions({
     } catch {
       return document.getElementById(anchorId)
     }
+  }
+
+  function getLocationKey(href = window.location.href) {
+    const url = new URL(href, window.location.origin)
+    return `${url.pathname}${url.search}${url.hash}`
   }
 
   function applyHomeAnchor(anchor) {
@@ -164,7 +175,7 @@ export function useSiteRouteTransitions({
   }
 
   function interceptGameReturn(href) {
-    if (gameReturnPending.value || routeLeaving.value) return
+    if (routeLeaving.value || committingGameReturn) return
     if (!isGamePage.value) return
 
     const targetPath = normalizeSitePath(
@@ -175,29 +186,48 @@ export function useSiteRouteTransitions({
     const gameKey = readActiveGameKey()
     if (!gameKey) return
 
-    const returnAnchor = window.location.hash || '#games'
-    gameReturnPending.value = true
-    suspendHomeAlignment()
-    homeHistory.suspend()
-    beginGameReturn(gameKey)
+    if (!gameReturnPending.value) {
+      gameReturnPending.value = true
+      suspendHomeAlignment()
+      homeHistory.suspend()
+      beginGameReturn(gameKey)
+    }
 
-    void navigateWithTransition(window.location.href, {
-      preempt: true,
-      afterRouteChange: async () => {
-        await restoreHomeAnchor(returnAnchor)
-        await waitForGameCarouselReady()
-        await restoreHomeAnchor(returnAnchor)
-        await nextTick()
+    const returnHref = new URL(href, window.location.origin).href
+    const requestId = ++gameReturnRequestId
+    pendingReturnHref = returnHref
+    window.clearTimeout(gameReturnTimer)
+    gameReturnTimer = window.setTimeout(() => {
+      gameReturnTimer = 0
+      if (requestId !== gameReturnRequestId || !pendingReturnHref) return
+
+      const settledHref = pendingReturnHref
+      pendingReturnHref = ''
+      const returnAnchor = new URL(settledHref).hash || '#games'
+      const returnLocation = getLocationKey(settledHref)
+
+      committingGameReturn = true
+      void navigateWithTransition(settledHref, {
+        preempt: true,
+        shouldCommitRoute: () => getLocationKey() === returnLocation,
+        afterRouteChange: async () => {
+          await restoreHomeAnchor(returnAnchor)
+          await waitForGameCarouselReady()
+          await restoreHomeAnchor(returnAnchor)
+          await nextTick()
+          homeHistory.resume()
+        }
+      }).catch(() => {
+        // 路由更新失败时由 VitePress 的下一次页面加载恢复
+      }).finally(() => {
+        committingGameReturn = false
+        if (requestId !== gameReturnRequestId) return
+        endGameReturn()
+        gameReturnPending.value = false
+        resumeHomeAlignment()
         homeHistory.resume()
-      }
-    }).catch(() => {
-      // 路由更新失败时由 VitePress 的下一次页面加载恢复
-    }).finally(() => {
-      endGameReturn()
-      gameReturnPending.value = false
-      resumeHomeAlignment()
-      homeHistory.resume()
-    })
+      })
+    }, RETURN_INPUT_SETTLE_MS)
 
     // 阻止 VitePress 在旧页面状态下先完成这次返回。
     return false
@@ -343,6 +373,10 @@ export function useSiteRouteTransitions({
   })
 
   onBeforeUnmount(() => {
+    gameReturnRequestId += 1
+    pendingReturnHref = ''
+    committingGameReturn = false
+    window.clearTimeout(gameReturnTimer)
     router.onBeforeRouteChange = previousBeforeRouteChange
     router.onBeforePageLoad = previousBeforePageLoad
     window.history.scrollRestoration = previousScrollRestoration
