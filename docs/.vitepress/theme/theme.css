@@ -350,12 +350,13 @@ html.game-route-transitioning .game-article-body {
 
 @media (max-width: 680px) {
   .page-content p.image-grid-3 {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(0.5rem, 2.5vw, 1rem);
   }
 
   .page-content p.image-grid-3 > a > img {
-    max-height: 140px;
+    width: 100%;
+    height: clamp(64px, 20vw, 96px);
   }
 
   .page-content img.image-left,
