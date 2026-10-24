@@ -18,6 +18,7 @@ import {
   normalizeSitePath,
   toSiteHref
 } from '../navigation/sitePaths.js'
+import { recordBackTransition } from '../navigation/backTransitionDiagnostics.js'
 import { getScrollTargetTop } from './usePageSectionSnap.js'
 import { useViewTransitionNavigation } from './useViewTransitionNavigation.js'
 
@@ -161,25 +162,44 @@ export function useSiteRouteTransitions({
   }
 
   async function handleBrowserBack(event) {
-    if (gameReturnPending.value) return
+    recordBackTransition('popstate', {
+      url: window.location.pathname + window.location.search,
+      state: JSON.stringify(event.state),
+      pending: gameReturnPending.value,
+      detailVisible: Boolean(document.querySelector('.game-article-hero')),
+      activeViewTransition: Boolean(document.activeViewTransition)
+    })
+    if (gameReturnPending.value) {
+      recordBackTransition('back:skip', { reason: 'pending' })
+      return
+    }
     if (
       normalizeSitePath(window.location.pathname) !==
       normalizeSitePath(siteHomePath.value)
     ) {
+      recordBackTransition('back:skip', { reason: 'not-home-url' })
       return
     }
-    if (!document.querySelector('.game-article-hero')) return
+    if (!document.querySelector('.game-article-hero')) {
+      recordBackTransition('back:skip', { reason: 'detail-missing' })
+      return
+    }
 
     const gameKey = readActiveGameKey()
-    if (!gameKey) return
+    if (!gameKey) {
+      recordBackTransition('back:skip', { reason: 'active-key-missing' })
+      return
+    }
 
     // 阻止 VitePress 抢先切页，改由下方的受控过渡完成后退。
     event.stopImmediatePropagation()
+    recordBackTransition('back:intercept', { gameKey })
     gameReturnPending.value = true
     suspendHomeAlignment()
     beginGameReturn(gameKey)
 
     try {
+      recordBackTransition('back:navigate-request')
       await navigateWithTransition(window.location.href, {
         afterRouteChange: async () => {
           await restoreHomeAnchor('games')
@@ -188,14 +208,25 @@ export function useSiteRouteTransitions({
           await nextTick()
         }
       })
+      recordBackTransition('back:navigate-complete', {
+        activeCard: document.querySelector(
+          '.game-carousel__slide.is-active .game-card__name'
+        )?.textContent.trim()
+      })
+    } catch (error) {
+      recordBackTransition('back:navigate-error', {
+        message: error?.message || String(error)
+      })
     } finally {
       endGameReturn()
       gameReturnPending.value = false
       resumeHomeAlignment()
+      recordBackTransition('back:cleanup')
     }
   }
 
   async function handleGameCatalogReturn() {
+    recordBackTransition('catalog:request')
     if (gameReturnPending.value) return
     gameReturnPending.value = true
     suspendHomeAlignment()
@@ -214,6 +245,7 @@ export function useSiteRouteTransitions({
     } finally {
       gameReturnPending.value = false
       resumeHomeAlignment()
+      recordBackTransition('catalog:cleanup')
     }
   }
 

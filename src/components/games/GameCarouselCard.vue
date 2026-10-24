@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useViewTransitionNavigation } from '../../composables/useViewTransitionNavigation.js'
+import { recordBackTransition } from '../../navigation/backTransitionDiagnostics.js'
 import { toSiteHref } from '../../navigation/sitePaths.js'
 import { getGameStatusLabel } from './gameStatus.js'
 import {
@@ -65,6 +66,11 @@ function handleNavigate(event) {
   })
 
   rememberActiveGame(getGameCardKey(props.game))
+  recordBackTransition('card:click', {
+    target: props.game.url,
+    current: window.location.pathname,
+    state: JSON.stringify(window.history.state)
+  })
   event.preventDefault()
   navigate(toSiteHref(props.game.url)).finally(() => {
     transitionElements.forEach(([element]) => {
