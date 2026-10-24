@@ -2,14 +2,52 @@ import { nextTick } from 'vue'
 import { useRouter } from 'vitepress'
 
 const FALLBACK_FADE_MS = 140
+const TRANSITION_TIMEOUT_MS = 3000
 const ROUTE_FALLBACK_CLASS = 'route-fallback-leaving'
 const TRANSITIONING_CLASS = 'game-route-transitioning'
+
+let activeTransition = null
+
+function waitForTransitionEnd(transition) {
+  return new Promise((resolve) => {
+    let settled = false
+    let timeout = 0
+
+    const finish = () => {
+      if (settled) return
+      settled = true
+      window.clearTimeout(timeout)
+      resolve()
+    }
+
+    timeout = window.setTimeout(() => {
+      transition.skipTransition?.()
+      finish()
+    }, TRANSITION_TIMEOUT_MS)
+
+    transition.ready.catch(() => {})
+    transition.finished.then(finish, finish)
+  })
+}
+
+async function settleActiveTransition() {
+  const transition =
+    document.activeViewTransition || activeTransition
+  if (!transition) return
+
+  transition.skipTransition?.()
+  await waitForTransitionEnd(transition)
+
+  if (activeTransition === transition) {
+    activeTransition = null
+  }
+}
 
 export function useViewTransitionNavigation() {
   const router = useRouter()
   let navigating = false
 
-  async function finishTransition(onFinished) {
+  function finishNavigation(onFinished) {
     try {
       onFinished?.()
     } finally {
@@ -19,119 +57,80 @@ export function useViewTransitionNavigation() {
 
   async function navigate(href, {
     afterRouteChange = null,
-    onFinished = null
+    onFinished = null,
+    preempt = false
   } = {}) {
-    if (navigating) return
+    if (navigating && !preempt) return false
     navigating = true
 
     const reducedMotion = window.matchMedia(
       '(prefers-reduced-motion: reduce)'
     ).matches
+    const updateRoute = async () => {
+      await router.go(href)
+      await nextTick()
+      await afterRouteChange?.()
+    }
 
     if (reducedMotion) {
       try {
-        await router.go(href)
-        await nextTick()
-        await afterRouteChange?.()
+        await settleActiveTransition()
+        await updateRoute()
       } finally {
-        try {
-          onFinished?.()
-        } finally {
-          navigating = false
-        }
+        finishNavigation(onFinished)
       }
-      return
+      return true
     }
 
     if (typeof document.startViewTransition === 'function') {
+      let updateStarted = false
+      let transition = null
+
+      await settleActiveTransition()
       document.documentElement.classList.add(TRANSITIONING_CLASS)
       try {
-        const transition = document.startViewTransition(async () => {
-          await router.go(href)
-          await nextTick()
-          await afterRouteChange?.()
+        transition = document.startViewTransition(async () => {
+          updateStarted = true
+          await updateRoute()
         })
-        await transition.finished
+        activeTransition = transition
+        await waitForTransitionEnd(transition)
       } catch {
-        // 浏览器中止过渡时保留当前路由，不重复跳转
+        // 动画被浏览器拒绝时仍要完成路由更新
+        if (!updateStarted) await updateRoute()
       } finally {
+        if (activeTransition === transition) {
+          activeTransition = null
+        }
         document.documentElement.classList.remove(TRANSITIONING_CLASS)
-        await finishTransition(onFinished)
+        finishNavigation(onFinished)
       }
-      return
+      return true
     }
 
+    await settleActiveTransition()
     document.documentElement.classList.add(ROUTE_FALLBACK_CLASS)
     document.documentElement.classList.add(TRANSITIONING_CLASS)
     try {
       await new Promise((resolve) => {
         window.setTimeout(resolve, FALLBACK_FADE_MS)
       })
-      await router.go(href)
-      await nextTick()
-      await afterRouteChange?.()
+      await updateRoute()
     } finally {
-      window.requestAnimationFrame(() => {
+      await new Promise((resolve) => {
+        window.requestAnimationFrame(resolve)
+      })
+      try {
         document.documentElement.classList.remove(ROUTE_FALLBACK_CLASS)
         document.documentElement.classList.remove(TRANSITIONING_CLASS)
-        finishTransition(onFinished)
-      })
-    }
-  }
-
-  async function transitionExistingNavigation({
-    waitFor = null,
-    onFinished = null
-  } = {}) {
-    if (navigating) return false
-    navigating = true
-
-    const reducedMotion = window.matchMedia(
-      '(prefers-reduced-motion: reduce)'
-    ).matches
-
-    if (reducedMotion) {
-      try {
-        await waitFor?.()
       } finally {
-        await finishTransition(onFinished)
+        finishNavigation(onFinished)
       }
-      return false
     }
-
-    if (typeof document.startViewTransition !== 'function') {
-      document.documentElement.classList.add(ROUTE_FALLBACK_CLASS)
-      document.documentElement.classList.add(TRANSITIONING_CLASS)
-      try {
-        await waitFor?.()
-      } finally {
-        window.requestAnimationFrame(() => {
-          document.documentElement.classList.remove(ROUTE_FALLBACK_CLASS)
-          document.documentElement.classList.remove(TRANSITIONING_CLASS)
-          finishTransition(onFinished)
-        })
-      }
-      return false
-    }
-
-    document.documentElement.classList.add(TRANSITIONING_CLASS)
-    try {
-      const transition = document.startViewTransition(async () => {
-        await waitFor?.()
-      })
-      await transition.finished
-    } catch {
-      // 浏览器中止过渡时保留已经完成的路由切换
-    } finally {
-      document.documentElement.classList.remove(TRANSITIONING_CLASS)
-      await finishTransition(onFinished)
-    }
-
-    return true
+    return false
   }
 
   return {
-    navigate,
-    transitionExistingNavigation
+    navigate
   }
 }
