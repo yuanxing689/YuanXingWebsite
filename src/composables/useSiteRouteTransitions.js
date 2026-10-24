@@ -35,10 +35,7 @@ export function useSiteRouteTransitions({
   const routeLeaving = ref(false)
   const gameReturnPending = ref(false)
   const router = useRouter()
-  const {
-    navigate: navigateWithTransition,
-    transitionExistingNavigation
-  } = useViewTransitionNavigation()
+  const { navigate: navigateWithTransition } = useViewTransitionNavigation()
   let previousScrollRestoration = 'auto'
 
   watch(isGamePage, (gamePage) => {
@@ -163,31 +160,7 @@ export function useSiteRouteTransitions({
     })
   }
 
-  function waitForHomeRoute() {
-    if (isHome.value) return nextTick()
-
-    return new Promise((resolve) => {
-      let settled = false
-      let timeout = 0
-      let stop = null
-
-      const finish = async () => {
-        if (settled) return
-        settled = true
-        window.clearTimeout(timeout)
-        stop?.()
-        await nextTick()
-        resolve()
-      }
-
-      stop = watch(isHome, (home) => {
-        if (home) finish()
-      }, { flush: 'post' })
-      timeout = window.setTimeout(finish, 800)
-    })
-  }
-
-  function handleBrowserBack() {
+  async function handleBrowserBack(event) {
     if (gameReturnPending.value) return
     if (
       normalizeSitePath(window.location.pathname) !==
@@ -200,22 +173,26 @@ export function useSiteRouteTransitions({
     const gameKey = readActiveGameKey()
     if (!gameKey) return
 
+    // 阻止 VitePress 抢先切页，改由下方的受控过渡完成后退。
+    event.stopImmediatePropagation()
     gameReturnPending.value = true
+    suspendHomeAlignment()
     beginGameReturn(gameKey)
-    transitionExistingNavigation({
-      waitFor: async () => {
-        await waitForHomeRoute()
-        await waitForGameCarouselReady()
-      },
-      onFinished: () => {
-        endGameReturn()
-        gameReturnPending.value = false
-      }
-    }).finally(() => {
-      if (!gameReturnPending.value) return
+
+    try {
+      await navigateWithTransition(window.location.href, {
+        afterRouteChange: async () => {
+          await restoreHomeAnchor('games')
+          await waitForGameCarouselReady()
+          await restoreHomeAnchor('games')
+          await nextTick()
+        }
+      })
+    } finally {
       endGameReturn()
       gameReturnPending.value = false
-    })
+      resumeHomeAlignment()
+    }
   }
 
   async function handleGameCatalogReturn() {
@@ -323,11 +300,11 @@ export function useSiteRouteTransitions({
   onMounted(() => {
     previousScrollRestoration = window.history.scrollRestoration
     window.history.scrollRestoration = 'manual'
-    window.addEventListener('popstate', handleBrowserBack)
+    window.addEventListener('popstate', handleBrowserBack, true)
   })
 
   onBeforeUnmount(() => {
-    window.removeEventListener('popstate', handleBrowserBack)
+    window.removeEventListener('popstate', handleBrowserBack, true)
     window.history.scrollRestoration = previousScrollRestoration
   })
 
