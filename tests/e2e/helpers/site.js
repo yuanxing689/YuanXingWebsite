@@ -83,6 +83,43 @@ export async function waitForNavigationToSettle(page) {
   })
 }
 
+export async function installViewTransitionCounter(page) {
+  await page.addInitScript(() => {
+    const nativeStartViewTransition = document.startViewTransition?.bind(document)
+    if (!nativeStartViewTransition) return
+
+    let transitionCount = 0
+    const sharedElementSnapshots = []
+    document.startViewTransition = (callback) => {
+      transitionCount += 1
+      return nativeStartViewTransition(async () => {
+        await callback()
+        sharedElementSnapshots.push({
+          cover: [...document.querySelectorAll('.game-card__cover-media')]
+            .some((element) => Boolean(element.style.viewTransitionName)),
+          title: [...document.querySelectorAll('.game-card__name')]
+            .some((element) => Boolean(element.style.viewTransitionName)),
+          status: [...document.querySelectorAll('.game-card__status')]
+            .some((element) => Boolean(element.style.viewTransitionName))
+        })
+      })
+    }
+    window.__getViewTransitionCount = () => transitionCount
+    window.__getViewTransitionSharedElements = () =>
+      sharedElementSnapshots.at(-1) ?? null
+  })
+}
+
+export async function readViewTransitionCount(page) {
+  return page.evaluate(() => window.__getViewTransitionCount?.() ?? 0)
+}
+
+export async function readLastViewTransitionSharedElements(page) {
+  return page.evaluate(
+    () => window.__getViewTransitionSharedElements?.() ?? null
+  )
+}
+
 export async function waitForGameDetail(page) {
   await expect(page.locator(GAME_DETAIL)).toBeVisible()
   await expect(page.locator('.game-article-hero')).toBeVisible()

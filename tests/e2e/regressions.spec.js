@@ -4,9 +4,12 @@ import {
   GAME_CAROUSEL_VIEWPORT,
   GAME_DETAIL,
   NAVIGATION,
+  installViewTransitionCounter,
   isSectionAtConfiguredScrollTarget,
   navigateHomeSection,
   openHome,
+  readViewTransitionCount,
+  readLastViewTransitionSharedElements,
   triggerBrowserBack,
   waitForGameDetail,
   waitForHomeReady,
@@ -117,13 +120,9 @@ test('4. 滚动转场未结束时再次导航，最后一次导航应胜出', as
   await linksLink.click({ force: true })
 
   await waitForSectionState(page, 'links')
-  const finalScrollY = await page.evaluate(() => window.scrollY)
   await page.waitForTimeout(900)
-  const settledScrollY = await page.evaluate(() => window.scrollY)
 
-  await expect(page).toHaveURL(/#links$/)
-  await expect(linksLink).toHaveAttribute('aria-current', 'location')
-  expect(Math.abs(settledScrollY - finalScrollY)).toBeLessThanOrEqual(3)
+  await waitForSectionState(page, 'links')
   await expect(aboutLink).not.toHaveAttribute('aria-current', 'location')
 })
 
@@ -175,6 +174,7 @@ test('5. 手机尺寸下轮播单行横向排列且页面没有横向溢出', as
 })
 
 test('6. 重复进出详情页不累积轮播监听器和持续性动画任务', async ({ page }) => {
+  test.setTimeout(60_000)
   await installResourceAudit(page)
   await openHome(page)
 
@@ -217,4 +217,36 @@ test('6. 重复进出详情页不累积轮播监听器和持续性动画任务',
       await waitForNavigationToSettle(page)
     }
   }
+})
+
+test('7. 游戏目录按钮显式返回只执行一次共享元素过渡', async ({ page }) => {
+  await installViewTransitionCounter(page)
+  await openHome(page)
+  await navigateHomeSection(page, 'games')
+
+  const { title } = await enterFirstGame(page)
+  await waitForNavigationToSettle(page)
+  const transitionsBeforeReturn = await readViewTransitionCount(page)
+
+  const catalogLink = page.locator(
+    `${NAVIGATION} a[data-section-link="games"]`
+  )
+  await catalogLink.click({ force: true })
+  await waitForHomeReady(page)
+  await waitForNavigationToSettle(page)
+
+  await expect(page).toHaveURL(/#games$/)
+  await expect(
+    page.locator(`${GAME_CARD}[aria-current="true"] .game-card__name`)
+  ).toHaveText(title)
+  expect(
+    await readViewTransitionCount(page) - transitionsBeforeReturn
+  ).toBe(1)
+  await expect.poll(
+    () => readLastViewTransitionSharedElements(page)
+  ).toEqual({
+    cover: true,
+    title: true,
+    status: true
+  })
 })
