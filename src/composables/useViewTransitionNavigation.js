@@ -2,8 +2,27 @@ import { nextTick } from 'vue'
 import { useRouter } from 'vitepress'
 
 const FALLBACK_FADE_MS = 140
+const VIEW_TRANSITION_FINISH_TIMEOUT_MS = 1200
 const ROUTE_FALLBACK_CLASS = 'route-fallback-leaving'
 const TRANSITIONING_CLASS = 'game-route-transitioning'
+
+function waitForViewTransition(transition) {
+  return new Promise((resolve) => {
+    let settled = false
+    const finish = () => {
+      if (settled) return
+      settled = true
+      window.clearTimeout(timeout)
+      resolve()
+    }
+    const timeout = window.setTimeout(
+      finish,
+      VIEW_TRANSITION_FINISH_TIMEOUT_MS
+    )
+
+    transition.finished.then(finish, finish)
+  })
+}
 
 export function useViewTransitionNavigation() {
   const router = useRouter()
@@ -51,7 +70,7 @@ export function useViewTransitionNavigation() {
           await nextTick()
           await afterRouteChange?.()
         })
-        await transition.finished
+        await waitForViewTransition(transition)
       } catch {
         // 浏览器中止过渡时保留当前路由，不重复跳转
       } finally {
