@@ -18,7 +18,6 @@ import {
   normalizeSitePath,
   toSiteHref
 } from '../navigation/sitePaths.js'
-import { recordBackTransition } from '../navigation/backTransitionDiagnostics.js'
 import { getScrollTargetTop } from './usePageSectionSnap.js'
 import { useViewTransitionNavigation } from './useViewTransitionNavigation.js'
 
@@ -36,7 +35,10 @@ export function useSiteRouteTransitions({
   const routeLeaving = ref(false)
   const gameReturnPending = ref(false)
   const router = useRouter()
-  const { navigate: navigateWithTransition } = useViewTransitionNavigation()
+  const {
+    navigate: navigateWithTransition,
+    transitionExistingNavigation
+  } = useViewTransitionNavigation()
   let previousScrollRestoration = 'auto'
 
   watch(isGamePage, (gamePage) => {
@@ -161,72 +163,62 @@ export function useSiteRouteTransitions({
     })
   }
 
-  async function handleBrowserBack(event) {
-    recordBackTransition('popstate', {
-      url: window.location.pathname + window.location.search,
-      state: JSON.stringify(event.state),
-      pending: gameReturnPending.value,
-      detailVisible: Boolean(document.querySelector('.game-article-hero')),
-      activeViewTransition: Boolean(document.activeViewTransition)
+  function waitForHomeRoute() {
+    if (isHome.value) return nextTick()
+
+    return new Promise((resolve) => {
+      let settled = false
+      let timeout = 0
+      let stop = null
+
+      const finish = async () => {
+        if (settled) return
+        settled = true
+        window.clearTimeout(timeout)
+        stop?.()
+        await nextTick()
+        resolve()
+      }
+
+      stop = watch(isHome, (home) => {
+        if (home) finish()
+      }, { flush: 'post' })
+      timeout = window.setTimeout(finish, 800)
     })
-    if (gameReturnPending.value) {
-      recordBackTransition('back:skip', { reason: 'pending' })
-      return
-    }
+  }
+
+  function handleBrowserBack() {
+    if (gameReturnPending.value) return
     if (
       normalizeSitePath(window.location.pathname) !==
       normalizeSitePath(siteHomePath.value)
     ) {
-      recordBackTransition('back:skip', { reason: 'not-home-url' })
       return
     }
-    if (!document.querySelector('.game-article-hero')) {
-      recordBackTransition('back:skip', { reason: 'detail-missing' })
-      return
-    }
+    if (!document.querySelector('.game-article-hero')) return
 
     const gameKey = readActiveGameKey()
-    if (!gameKey) {
-      recordBackTransition('back:skip', { reason: 'active-key-missing' })
-      return
-    }
+    if (!gameKey) return
 
-    // 阻止 VitePress 抢先切页，改由下方的受控过渡完成后退。
-    event.stopImmediatePropagation()
-    recordBackTransition('back:intercept', { gameKey })
     gameReturnPending.value = true
-    suspendHomeAlignment()
     beginGameReturn(gameKey)
-
-    try {
-      recordBackTransition('back:navigate-request')
-      await navigateWithTransition(window.location.href, {
-        afterRouteChange: async () => {
-          await restoreHomeAnchor('games')
-          await waitForGameCarouselReady()
-          await restoreHomeAnchor('games')
-          await nextTick()
-        }
-      })
-      recordBackTransition('back:navigate-complete', {
-        activeCard: document.querySelector(
-          '.game-carousel__slide.is-active .game-card__name'
-        )?.textContent.trim()
-      })
-    } catch (error) {
-      recordBackTransition('back:navigate-error', {
-        message: error?.message || String(error)
-      })
-    } finally {
+    transitionExistingNavigation({
+      waitFor: async () => {
+        await waitForHomeRoute()
+        await waitForGameCarouselReady()
+      },
+      onFinished: () => {
+        endGameReturn()
+        gameReturnPending.value = false
+      }
+    }).finally(() => {
+      if (!gameReturnPending.value) return
       endGameReturn()
       gameReturnPending.value = false
-      resumeHomeAlignment()
-      recordBackTransition('back:cleanup')
-    }
+    })
   }
 
   async function handleGameCatalogReturn() {
-    recordBackTransition('catalog:request')
     if (gameReturnPending.value) return
     gameReturnPending.value = true
     suspendHomeAlignment()
@@ -245,7 +237,6 @@ export function useSiteRouteTransitions({
     } finally {
       gameReturnPending.value = false
       resumeHomeAlignment()
-      recordBackTransition('catalog:cleanup')
     }
   }
 
@@ -332,11 +323,11 @@ export function useSiteRouteTransitions({
   onMounted(() => {
     previousScrollRestoration = window.history.scrollRestoration
     window.history.scrollRestoration = 'manual'
-    window.addEventListener('popstate', handleBrowserBack, true)
+    window.addEventListener('popstate', handleBrowserBack)
   })
 
   onBeforeUnmount(() => {
-    window.removeEventListener('popstate', handleBrowserBack, true)
+    window.removeEventListener('popstate', handleBrowserBack)
     window.history.scrollRestoration = previousScrollRestoration
   })
 

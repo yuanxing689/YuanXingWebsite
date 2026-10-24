@@ -12,7 +12,6 @@ import { Content } from 'vitepress/dist/client/app/components/Content.js'
 import BrandWordmark from '../../../src/components/BrandWordmark.vue'
 import GameArticleHero from '../../../src/components/games/GameArticleHero.vue'
 import NavigationStarCanvas from '../../../src/components/navigation/NavigationStarCanvas.vue'
-import BackTransitionDebugOverlay from '../../../src/components/navigation/BackTransitionDebugOverlay.vue'
 import NotFoundPage from '../../../src/components/NotFoundPage.vue'
 import SiteHeader from '../../../src/components/navigation/SiteHeader.vue'
 import SpaceBackdrop from '../../../src/components/SpaceBackdrop.vue'
@@ -264,6 +263,5 @@ onMounted(async () => {
     </div>
 
     <div v-if="isHome && introLocked" class="intro-input-lock" aria-hidden="true" />
-    <BackTransitionDebugOverlay />
   </div>
 </template>
