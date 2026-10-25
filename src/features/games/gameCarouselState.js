@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { toSitePath } from '../../navigation/sitePaths.js'
+import { toSitePath } from '../../app/navigation/sitePaths.js'
 
 const ACTIVE_GAME_KEY = 'yuanxing:active-game'
 const RETURN_READY_TIMEOUT = 300

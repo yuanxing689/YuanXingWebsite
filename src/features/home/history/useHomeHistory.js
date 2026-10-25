@@ -1,5 +1,5 @@
 import { onBeforeUnmount, watch } from 'vue'
-import { toSiteHref } from '../navigation/sitePaths.js'
+import { toSiteHref } from '../../../app/navigation/sitePaths.js'
 
 // 首页区块历史：显式导航新增条目，滚动与路由离场只更新当前条目。
 const SECTION_SYNC_DELAY = 140

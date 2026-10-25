@@ -1,5 +1,5 @@
 <script setup>
-import { toSiteHref } from '../navigation/sitePaths.js'
+import { toSiteHref } from '../../app/navigation/sitePaths.js'
 
 const trackStyle = {
   backgroundImage: `url("${toSiteHref('/assets/space-bg-mirror.webp')}")`

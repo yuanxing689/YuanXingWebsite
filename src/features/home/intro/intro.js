@@ -6,7 +6,7 @@ import {
   SCENE_START,
   writeIntroCss
 } from './introState.js'
-import { getBootParam } from '../runtime/bootParams.js'
+import { getBootParam } from '../../../app/runtime/bootParams.js'
 
 // 全站只保留一个 requestAnimationFrame：Anime 引擎由 cosmicLoop 手动驱动。
 // 同一帧先 engine.update()，再更新 uniform / 渲染，保证补间值当帧生效。

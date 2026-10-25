@@ -13,13 +13,13 @@ import {
   readActiveGameKey,
   rememberActiveGame,
   waitForGameCarouselReady
-} from '../components/games/gameCarouselState.js'
+} from '../../features/games/gameCarouselState.js'
 import {
   normalizeSitePath,
   toSiteHref
-} from '../navigation/sitePaths.js'
-import { getScrollTargetTop } from './usePageSectionSnap.js'
-import { useViewTransitionNavigation } from './useViewTransitionNavigation.js'
+} from './sitePaths.js'
+import { getScrollTargetTop } from '../../features/home/scroll/usePageSectionSnap.js'
+import { useViewTransitionNavigation } from '../transitions/useViewTransitionNavigation.js'
 
 const RETURN_INPUT_SETTLE_MS = 100
 

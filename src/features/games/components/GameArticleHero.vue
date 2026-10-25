@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
-import { toSiteHref } from '../../navigation/sitePaths.js'
-import { getGameStatusLabel } from './gameStatus.js'
+import { toSiteHref } from '../../../app/navigation/sitePaths.js'
+import { getGameStatusLabel } from '../gameStatus.js'
 
 const props = defineProps({
   frontmatter: {

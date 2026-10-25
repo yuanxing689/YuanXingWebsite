@@ -1,12 +1,12 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { useViewTransitionNavigation } from '../../composables/useViewTransitionNavigation.js'
-import { toSiteHref } from '../../navigation/sitePaths.js'
-import { getGameStatusLabel } from './gameStatus.js'
+import { useViewTransitionNavigation } from '../../../app/transitions/useViewTransitionNavigation.js'
+import { toSiteHref } from '../../../app/navigation/sitePaths.js'
+import { getGameStatusLabel } from '../gameStatus.js'
 import {
   getGameCardKey,
   rememberActiveGame
-} from './gameCarouselState.js'
+} from '../gameCarouselState.js'
 
 const props = defineProps({
   game: { type: Object, required: true },

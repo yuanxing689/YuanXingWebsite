@@ -1,5 +1,5 @@
 import { computed, toValue } from 'vue'
-import { toSiteHref } from '../navigation/sitePaths.js'
+import { toSiteHref } from '../../app/navigation/sitePaths.js'
 
 const MOBILE_BREAKPOINT = 680
 const DESKTOP_NAVIGATION_CENTER_Y = 45

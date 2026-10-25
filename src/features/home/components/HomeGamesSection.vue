@@ -1,5 +1,5 @@
 <script setup>
-import GameCarousel from '../games/GameCarousel.vue'
+import GameCarousel from '../../games/components/GameCarousel.vue'
 import HomeSection from './HomeSection.vue'
 
 defineProps({

@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import { SITE_SCROLL_OFFSET } from '../../../src/navigation/siteScroll.js'
+import { SITE_SCROLL_OFFSET } from '../../../src/app/navigation/siteScroll.js'
 
 export const HOME_PATH = '/?intro=off'
 export const NAVIGATION = 'nav[aria-label="主导航"]'

@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { useSectionReveal } from '../../composables/useSectionReveal.js'
+import { useSectionReveal } from '../scroll/useSectionReveal.js'
 
 const props = defineProps({
   id: { type: String, required: true },

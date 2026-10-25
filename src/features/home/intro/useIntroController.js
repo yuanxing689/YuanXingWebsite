@@ -1,5 +1,5 @@
 import { onBeforeUnmount, ref } from 'vue'
-import { applyIntroEndState } from '../intro/introState.js'
+import { applyIntroEndState } from './introState.js'
 
 export function useIntroController({
   isHome,
@@ -48,7 +48,7 @@ export function useIntroController({
     if (introModule) return true
 
     try {
-      introModule = await import('../intro/intro.js')
+      introModule = await import('./intro.js')
       introLoadFailed = false
       return true
     } catch (error) {

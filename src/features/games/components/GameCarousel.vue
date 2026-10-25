@@ -7,7 +7,7 @@ import {
   rememberActiveGame,
   returningGameKey,
   signalGameCarouselReady
-} from './gameCarouselState.js'
+} from '../gameCarouselState.js'
 
 const props = defineProps({
   games: { type: Array, default: () => [] }

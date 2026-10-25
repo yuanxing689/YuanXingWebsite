@@ -1,7 +1,7 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useData, useRoute } from 'vitepress'
-import { toSiteHref } from '../navigation/sitePaths.js'
+import { toSiteHref } from './navigation/sitePaths.js'
 
 const route = useRoute()
 const { site } = useData()

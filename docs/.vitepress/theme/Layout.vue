@@ -8,19 +8,19 @@ import {
 import { useData, useRoute } from 'vitepress'
 // 直接引用 Content，避免 data loader 与 VitePress 公共入口形成循环 chunk。
 import { Content } from 'vitepress/dist/client/app/components/Content.js'
-import GameArticleHero from '../../../src/components/games/GameArticleHero.vue'
-import PersistentSiteChrome from '../../../src/components/navigation/PersistentSiteChrome.vue'
-import NotFoundPage from '../../../src/components/NotFoundPage.vue'
+import GameArticleHero from '../../../src/features/games/components/GameArticleHero.vue'
+import PersistentSiteChrome from '../../../src/components/chrome/PersistentSiteChrome.vue'
+import NotFoundPage from '../../../src/app/NotFoundPage.vue'
 import { data as homeSections } from '../data/home.data.js'
-import { useHomeHistory } from '../../../src/composables/useHomeHistory.js'
-import { useHomeScrollState } from '../../../src/composables/useHomeScrollState.js'
-import { useIntroController } from '../../../src/composables/useIntroController.js'
-import { usePageSectionSnap } from '../../../src/composables/usePageSectionSnap.js'
-import { useSiteRouteTransitions } from '../../../src/composables/useSiteRouteTransitions.js'
+import { useHomeHistory } from '../../../src/features/home/history/useHomeHistory.js'
+import { useHomeScrollState } from '../../../src/features/home/scroll/useHomeScrollState.js'
+import { useIntroController } from '../../../src/features/home/intro/useIntroController.js'
+import { usePageSectionSnap } from '../../../src/features/home/scroll/usePageSectionSnap.js'
+import { useSiteRouteTransitions } from '../../../src/app/navigation/useSiteRouteTransitions.js'
 import {
   normalizeSitePath,
   toSiteHref
-} from '../../../src/navigation/sitePaths.js'
+} from '../../../src/app/navigation/sitePaths.js'
 
 const route = useRoute()
 const { frontmatter, page, site } = useData()

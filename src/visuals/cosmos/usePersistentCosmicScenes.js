@@ -5,10 +5,10 @@ import {
   toValue,
   watch
 } from 'vue'
-import { getBootParam } from '../runtime/bootParams.js'
-import { createCosmicLoop } from '../three/cosmicLoop.js'
-import { createLogoScene } from '../three/logoScene.js'
-import { createPersistentNavigationScene } from '../three/persistentNavigationScene.js'
+import { getBootParam } from '../../app/runtime/bootParams.js'
+import { createCosmicLoop } from './cosmicLoop.js'
+import { createLogoScene } from './logoScene.js'
+import { createPersistentNavigationScene } from './persistentNavigationScene.js'
 
 const VISUAL_READY_TIMEOUT_MS = 4000
 

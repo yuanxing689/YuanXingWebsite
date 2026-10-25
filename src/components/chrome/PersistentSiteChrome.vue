@@ -1,10 +1,10 @@
 <script setup>
 import { computed, ref } from 'vue'
-import BrandWordmark from '../BrandWordmark.vue'
-import SpaceBackdrop from '../SpaceBackdrop.vue'
-import { getBrandGeometry } from '../../layout/brandGeometry.js'
-import { usePersistentCosmicScenes } from '../../composables/usePersistentCosmicScenes.js'
-import { useSiteNavigation } from '../../composables/useSiteNavigation.js'
+import BrandWordmark from './BrandWordmark.vue'
+import SpaceBackdrop from './SpaceBackdrop.vue'
+import { getBrandGeometry } from './brandGeometry.js'
+import { usePersistentCosmicScenes } from '../../visuals/cosmos/usePersistentCosmicScenes.js'
+import { useSiteNavigation } from './useSiteNavigation.js'
 import SiteBrandButton from './SiteBrandButton.vue'
 import SiteNavigation from './SiteNavigation.vue'
 

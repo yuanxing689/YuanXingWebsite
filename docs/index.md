@@ -6,9 +6,9 @@ description: 元星联邦汉化组官网。
 <script setup>
 import { data as homeSections } from './.vitepress/data/home.data.js'
 import { data as games } from './.vitepress/data/games.data.js'
-import HomeAboutSection from '../src/components/home/HomeAboutSection.vue'
-import HomeGamesSection from '../src/components/home/HomeGamesSection.vue'
-import HomeLinksSection from '../src/components/home/HomeLinksSection.vue'
+import HomeAboutSection from '../src/features/home/components/HomeAboutSection.vue'
+import HomeGamesSection from '../src/features/home/components/HomeGamesSection.vue'
+import HomeLinksSection from '../src/features/home/components/HomeLinksSection.vue'
 
 const sectionComponents = {
   about: HomeAboutSection,
