@@ -3,14 +3,18 @@ import { defineConfig, devices } from '@playwright/test'
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:4173'
 const isCI = Boolean(process.env.CI)
 const browserChannel = process.env.PLAYWRIGHT_BROWSER_CHANNEL || undefined
+const browserProject = browserChannel === 'msedge' ? 'edge' : 'chromium'
 const browserUse = {
   ...devices['Desktop Chrome'],
+  deviceScaleFactor: 1,
   ...(browserChannel ? { channel: browserChannel } : {})
 }
 
 export default defineConfig({
   testDir: './tests/e2e',
   testMatch: '**/*.spec.js',
+  snapshotPathTemplate:
+    '{testDir}/{testFilePath}-snapshots/{arg}-{projectName}{ext}',
   fullyParallel: false,
   forbidOnly: isCI,
   retries: isCI ? 1 : 0,
@@ -30,7 +34,7 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'chromium',
+      name: browserProject,
       use: browserUse
     }
   ],
