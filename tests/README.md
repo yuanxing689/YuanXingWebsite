@@ -81,4 +81,9 @@ Playwright 会自动在 `127.0.0.1:4173` 启动 VitePress 开发服务器，并�
 - 不直接修改 `tests/e2e/visual.spec.js-snapshots/`。确需重建基准时，应确认需求明确要求视觉变化，并单独审查图片。
 - `.screenshots/` 是临时人工调试目录，不属于自动化基准。
 
-GitHub Actions 的 `Quality checks` 在 Windows runner 上执行构建、单元测试和完整 Chromium 回归，以保持视觉基准的操作系统渲染环境一致；失败时上传 trace、截图和录屏。
+GitHub Actions 的 `Quality checks` 分两部分执行：
+
+- Ubuntu 作业执行构建、单元测试和除截图比较外的全部浏览器行为测试，CI Chromium 强制使用 SwiftShader。
+- Windows 作业只执行视觉截图比较，以匹配当前 Windows 视觉基准；CI 不录制视频，只保留失败 trace。
+
+CI 的测试与等待超时高于本地，仅用于覆盖无 GPU runner 的启动波动，不改变业务断言或截图阈值。

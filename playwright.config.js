@@ -4,10 +4,21 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:4173'
 const isCI = Boolean(process.env.CI)
 const browserChannel = process.env.PLAYWRIGHT_BROWSER_CHANNEL || undefined
 const browserProject = browserChannel === 'msedge' ? 'edge' : 'chromium'
+const chromiumLaunchOptions = isCI && !browserChannel
+  ? {
+      args: [
+        '--use-angle=swiftshader',
+        '--enable-unsafe-swiftshader'
+      ]
+    }
+  : null
 const browserUse = {
   ...devices['Desktop Chrome'],
   deviceScaleFactor: 1,
-  ...(browserChannel ? { channel: browserChannel } : {})
+  ...(browserChannel ? { channel: browserChannel } : {}),
+  ...(chromiumLaunchOptions
+    ? { launchOptions: chromiumLaunchOptions }
+    : {})
 }
 
 export default defineConfig({
@@ -19,8 +30,8 @@ export default defineConfig({
   forbidOnly: isCI,
   retries: isCI ? 1 : 0,
   workers: 1,
-  timeout: 30_000,
-  expect: { timeout: 8_000 },
+  timeout: isCI ? 90_000 : 30_000,
+  expect: { timeout: isCI ? 20_000 : 8_000 },
   reporter: isCI
     ? [['list'], ['html', { open: 'never' }]]
     : 'list',
@@ -28,8 +39,8 @@ export default defineConfig({
     baseURL,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
-    video: isCI ? 'retain-on-failure' : 'off',
-    actionTimeout: 12_000,
+    video: 'off',
+    actionTimeout: isCI ? 20_000 : 12_000,
     ...browserUse
   },
   projects: [
