@@ -18,6 +18,8 @@ import {
   normalizeSitePath,
   toSiteHref
 } from './sitePaths.js'
+import { createBrowserHistoryGateway } from './browserHistoryGateway.js'
+import { createVitePressRouterAdapter } from './vitePressRouterAdapter.js'
 import { getScrollTargetTop } from '../../features/home/scroll/usePageSectionSnap.js'
 import { useViewTransitionNavigation } from '../transitions/useViewTransitionNavigation.js'
 
@@ -39,10 +41,12 @@ export function useSiteRouteTransitions({
   const routeLeaving = ref(false)
   const gameReturnPending = ref(false)
   const router = useRouter()
-  const { navigate: navigateWithTransition } = useViewTransitionNavigation()
+  const historyGateway = createBrowserHistoryGateway()
+  const routerAdapter = createVitePressRouterAdapter(router)
+  const { navigate: navigateWithTransition } =
+    useViewTransitionNavigation({ routerAdapter })
   let previousScrollRestoration = 'auto'
-  let previousBeforeRouteChange = null
-  let previousBeforePageLoad = null
+  let uninstallRouterHooks = null
   let gameReturnTimer = 0
   let pendingReturnHref = ''
   let gameReturnRequestId = 0
@@ -278,7 +282,7 @@ export function useSiteRouteTransitions({
 
     try {
       await waitForHomeVisuals(href)
-      await router.go(href)
+      await routerAdapter.navigate(href)
       await nextTick()
       await restoreHomeAnchor()
       await waitForStableHomeAnchor()
@@ -372,22 +376,17 @@ export function useSiteRouteTransitions({
   }
 
   onMounted(() => {
-    previousScrollRestoration = window.history.scrollRestoration
-    window.history.scrollRestoration = 'manual'
+    previousScrollRestoration = historyGateway.getScrollRestoration()
+    historyGateway.setScrollRestoration('manual')
 
-    previousBeforeRouteChange = router.onBeforeRouteChange
-    router.onBeforeRouteChange = async (href) => {
-      const previousResult = await previousBeforeRouteChange?.(href)
-      if (previousResult === false) return false
-      if (isHome.value) homeHistory.commitCurrentSection()
-    }
-
-    previousBeforePageLoad = router.onBeforePageLoad
-    router.onBeforePageLoad = async (href) => {
-      const previousResult = await previousBeforePageLoad?.(href)
-      if (previousResult === false) return false
-      return interceptGameReturn(href)
-    }
+    uninstallRouterHooks = routerAdapter.install({
+      onBeforeRouteChange(href) {
+        if (isHome.value) homeHistory.commitCurrentSection()
+      },
+      onBeforePageLoad(href) {
+        return interceptGameReturn(href)
+      }
+    })
   })
 
   onBeforeUnmount(() => {
@@ -395,9 +394,9 @@ export function useSiteRouteTransitions({
     pendingReturnHref = ''
     committingGameReturn = false
     window.clearTimeout(gameReturnTimer)
-    router.onBeforeRouteChange = previousBeforeRouteChange
-    router.onBeforePageLoad = previousBeforePageLoad
-    window.history.scrollRestoration = previousScrollRestoration
+    uninstallRouterHooks?.()
+    uninstallRouterHooks = null
+    historyGateway.setScrollRestoration(previousScrollRestoration)
   })
 
   return {

@@ -1,4 +1,5 @@
 import { onBeforeUnmount, watch } from 'vue'
+import { createBrowserHistoryGateway } from '../../../app/navigation/browserHistoryGateway.js'
 import { toSiteHref } from '../../../app/navigation/sitePaths.js'
 
 // 首页区块历史：显式导航新增条目，滚动与路由离场只更新当前条目。
@@ -9,12 +10,8 @@ function getSectionHref(section) {
   return toSiteHref(section ? `/#${encodeURIComponent(section)}` : '/')
 }
 
-function getLocationKey(href = window.location.href) {
-  const url = new URL(href, window.location.origin)
-  return `${url.pathname}${url.search}${url.hash}`
-}
-
 export function useHomeHistory({ isHome, activeSection }) {
+  const historyGateway = createBrowserHistoryGateway()
   let initialized = false
   let suspended = false
   let expectedSection = null
@@ -39,13 +36,17 @@ export function useHomeHistory({ isHome, activeSection }) {
     if (!canWriteHistory()) return false
 
     const href = getSectionHref(section)
-    if (getLocationKey(href) === getLocationKey()) return false
+    if (
+      historyGateway.getLocationKey(href) === historyGateway.getLocationKey()
+    ) {
+      return false
+    }
 
-    window.history.replaceState({
-      ...(window.history.state ?? {}),
+    historyGateway.replace(href, {
+      ...historyGateway.getState(),
       homeSection: section || '',
       scrollPosition: window.scrollY
-    }, '', href)
+    })
     return true
   }
 
@@ -63,7 +64,7 @@ export function useHomeHistory({ isHome, activeSection }) {
     const normalizedSection = section || ''
     const href = getSectionHref(normalizedSection)
     const state = {
-      ...(window.history.state ?? {}),
+      ...historyGateway.getState(),
       homeSection: normalizedSection,
       // 0 让 VitePress 在直接返回该历史项时按 hash 定位
       scrollPosition: 0
@@ -73,10 +74,12 @@ export function useHomeHistory({ isHome, activeSection }) {
     clearNavigationTimer()
     expectedSection = normalizedSection
 
-    if (getLocationKey(href) === getLocationKey()) {
-      window.history.replaceState(state, '', href)
+    if (
+      historyGateway.getLocationKey(href) === historyGateway.getLocationKey()
+    ) {
+      historyGateway.replace(href, state)
     } else {
-      window.history.pushState(state, '', href)
+      historyGateway.push(href, state)
     }
 
     navigationTimer = window.setTimeout(() => {

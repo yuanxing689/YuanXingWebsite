@@ -1,5 +1,6 @@
 import { nextTick } from 'vue'
 import { useRouter } from 'vitepress'
+import { createVitePressRouterAdapter } from '../navigation/vitePressRouterAdapter.js'
 
 const FALLBACK_FADE_MS = 140
 const TRANSITION_TIMEOUT_MS = 3000
@@ -43,8 +44,12 @@ async function settleActiveTransition() {
   }
 }
 
-export function useViewTransitionNavigation() {
+export function useViewTransitionNavigation({
+  routerAdapter = null
+} = {}) {
   const router = useRouter()
+  const adapter =
+    routerAdapter ?? createVitePressRouterAdapter(router)
   let navigating = false
 
   function finishNavigation(onFinished) {
@@ -70,7 +75,7 @@ export function useViewTransitionNavigation() {
     let routeUpdated = false
     const updateRoute = async () => {
       if (shouldCommitRoute && !shouldCommitRoute()) return false
-      await router.go(href)
+      await adapter.navigate(href)
       await nextTick()
       await afterRouteChange?.()
       routeUpdated = true
