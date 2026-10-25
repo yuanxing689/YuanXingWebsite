@@ -7,6 +7,7 @@ import { createLogoBloom } from './logoBloom.js'
 import {
   createCosmicCamera,
   createCosmicRenderer,
+  isSoftwareCosmicRenderer,
   resizeCosmicCamera
 } from './cosmicRuntime.js'
 
@@ -177,7 +178,9 @@ export function createLogoScene(canvas, {
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
 
-  const bloom = createLogoBloom(renderer, scene, camera)
+  const bloom = createLogoBloom(renderer, scene, camera, {
+    enabled: !isSoftwareCosmicRenderer(renderer)
+  })
 
   // 开场动画状态：由外部时间轴（Anime.js）直接改写，渲染循环每帧读取并应用
   const intro = {

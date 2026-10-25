@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import {
   createCosmicCamera,
   createCosmicRenderer,
+  isSoftwareCosmicRenderer,
   resizeCosmicCamera
 } from './cosmicRuntime.js'
 import { createLogoBloom } from './logoBloom.js'
@@ -22,7 +23,9 @@ export function createPersistentNavigationScene(canvas, {
   const camera = createCosmicCamera()
   const field = createNavigationStarField({ count: 3 })
   const updateStars = createNavigationStarUpdater(field)
-  const bloom = createLogoBloom(renderer, scene, camera)
+  const bloom = createLogoBloom(renderer, scene, camera, {
+    enabled: !isSoftwareCosmicRenderer(renderer)
+  })
   bloom.setIntensity(1)
   scene.add(field.group)
 
