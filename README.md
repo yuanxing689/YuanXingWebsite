@@ -35,6 +35,16 @@ npm run build
 npm run preview
 ```
 
+浏览器回归测试：
+
+```bash
+npx playwright install chromium
+npm run test:e2e:baseline
+npm run test:e2e
+```
+
+测试说明见 [`tests/README.md`](./tests/README.md)。
+
 构建产物会输出到忽略目录，不提交。
 
 ## 项目结构
@@ -60,6 +70,8 @@ npm run preview
 │  ├─ layout/                      # 品牌几何等纯布局计算
 │  ├─ intro/                       # 首页开场时间轴
 │  └─ three/                       # Three.js 场景、几何、材质和后处理
+├─ tests/e2e/                      # Playwright 浏览器回归测试
+└─ playwright.config.js            # Playwright 测试服务器与浏览器配置
 ```
 
 构建缓存、截图和调试输出不应手工维护或提交。
@@ -297,7 +309,7 @@ npm run build
 - `prefers-reduced-motion` 和无 WebGL 降级。
 - 浏览器控制台无错误。
 
-当前没有自动化测试或 lint 脚本；`npm run build` 和浏览器回归是主要验证手段。
+浏览器交互回归使用 Playwright，覆盖首页渲染、开场解锁、区块导航、游戏卡片返回、连续后退、手机轮播和资源清理。当前仍没有独立 lint 或格式化脚本；`npm run build` 和 `npm run test:e2e` 是主要质量检查。
 
 ## 构建与部署
 

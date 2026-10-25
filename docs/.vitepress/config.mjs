@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitepress'
 import { createSiteImagePlugin } from './markdown/siteImages.js'
+import { SITE_SCROLL_OFFSET } from '../../src/navigation/siteScroll.js'
 
 const siteBase = process.env.SITE_BASE || '/'
 const normalizedBase = siteBase.endsWith('/') ? siteBase : `${siteBase}/`
@@ -19,7 +20,7 @@ export default defineConfig({
   cleanUrls: true,
   srcExclude: ['home/**', 'games/README.md'],
   outDir: '../dist',
-  scrollOffset: 88,
+  scrollOffset: SITE_SCROLL_OFFSET,
   markdown: {
     config: createSiteImagePlugin(normalizedBase)
   },
