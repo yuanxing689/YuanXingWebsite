@@ -28,6 +28,19 @@ html.intro-locked body {
   cursor: default;
 }
 
+.visually-hidden {
+  position: absolute !important;
+  overflow: hidden !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  margin: -1px !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+}
+
 .site-shell {
   position: relative;
   isolation: isolate;
@@ -79,61 +92,16 @@ html.game-route-transitioning .game-article-body {
   transition: none;
 }
 
-.site-shell > .space-backdrop {
-  position: fixed;
-  z-index: -1;
-  inset: 0;
-  min-height: 100%;
-}
-
 .home-hero {
   position: relative;
-  z-index: 31;
+  z-index: 1;
   min-height: 100vh;
   min-height: 100svh;
-  isolation: isolate;
   pointer-events: none;
 }
 
 .site-shell--home .page-content {
   padding-bottom: 0;
-}
-
-.home-hero__scene {
-  position: fixed !important;
-  z-index: 0 !important;
-  inset: 0;
-  width: 100vw !important;
-  height: var(--site-viewport-height, 100vh) !important;
-  max-height: none !important;
-  margin: 0 !important;
-  pointer-events: none;
-}
-
-.home-hero__scene .logo-canvas {
-  touch-action: pan-y;
-  cursor: default;
-  pointer-events: none;
-}
-
-.hero-logo-anchor {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: min(68vw, 620px, 72vh);
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
-.hero-logo-replacement {
-  position: fixed;
-  z-index: 3;
-  object-fit: contain;
-  pointer-events: none;
-  transform: translate(-50%, -50%) scale(1.24);
-  transform-origin: center;
-  user-select: none;
 }
 
 .page-content {

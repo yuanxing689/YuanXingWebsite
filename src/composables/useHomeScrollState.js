@@ -9,7 +9,6 @@ export function useHomeScrollState({ isHome }) {
   const viewport = ref({ width: 1440, height: 900 })
   const navigationViewport = ref({ width: 1440, height: 900 })
   const scrollProgress = ref(0)
-  const logoReplacementProgress = ref(0)
   const activeSection = ref('')
   let scrollFrame = 0
 
@@ -24,25 +23,11 @@ export function useHomeScrollState({ isHome }) {
     }
   }
 
-  function calculateLogoReplacementProgress() {
-    if (!isHome.value) return 0
-
-    const settleAt = window.innerHeight * 0.62
-    const hero = document.querySelector('.home-hero')
-    const sectionTop = hero
-      ? hero.getBoundingClientRect().bottom + window.scrollY
-      : window.innerHeight
-    const range = Math.max(sectionTop - settleAt, 1)
-
-    return Math.min(Math.max((window.scrollY - settleAt) / range, 0), 1)
-  }
-
   function updateScrollProgress() {
     scrollProgress.value = Math.min(
       Math.max(window.scrollY / Math.max(window.innerHeight * 0.62, 1), 0),
       1
     )
-    logoReplacementProgress.value = calculateLogoReplacementProgress()
   }
 
   function updateActiveSection() {
@@ -81,10 +66,6 @@ export function useHomeScrollState({ isHome }) {
     })
   }
 
-  function getMainLogoOpacity() {
-    return 1 - calculateLogoReplacementProgress()
-  }
-
   watch(isHome, refreshLayout, { flush: 'post' })
 
   onMounted(() => {
@@ -118,9 +99,7 @@ export function useHomeScrollState({ isHome }) {
     viewport,
     navigationViewport,
     scrollProgress,
-    logoReplacementProgress,
     activeSection,
-    getMainLogoOpacity,
     refreshLayout
   }
 }

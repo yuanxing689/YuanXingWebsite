@@ -3,9 +3,7 @@ import { ref } from 'vue'
 
 defineProps({
   travelStyle: { type: Object, default: null },
-  settled: { type: Boolean, default: false },
-  tag: { type: String, default: 'h1' },
-  headingId: { type: String, default: undefined }
+  settled: { type: Boolean, default: false }
 })
 
 const wordmarkRef = ref(null)
@@ -43,16 +41,13 @@ defineExpose({ updateLight })
     ref="wordmarkRef"
     class="brand-wordmark"
     :class="{ 'brand-wordmark--settled': settled }"
+    aria-hidden="true"
   >
     <div class="brand-wordmark__lockup" :style="travelStyle">
-      <component
-        :is="tag"
-        :id="headingId"
-        class="brand-wordmark__text brand-wordmark__base"
-      >
+      <span class="brand-wordmark__text brand-wordmark__base">
         元星联邦
-      </component>
-      <span ref="glowRef" class="brand-wordmark__text brand-wordmark__glow" aria-hidden="true">元星联邦</span>
+      </span>
+      <span ref="glowRef" class="brand-wordmark__text brand-wordmark__glow">元星联邦</span>
     </div>
   </div>
 </template>
@@ -65,7 +60,9 @@ defineExpose({ updateLight })
   position: fixed;
   inset: 0;
   z-index: 35;
+  opacity: var(--chrome-transition-opacity, 1);
   pointer-events: none;
+  transition: opacity 180ms ease;
 }
 
 .brand-wordmark__lockup {
@@ -150,6 +147,12 @@ defineExpose({ updateLight })
   .brand-wordmark__text {
     letter-spacing: 0.12em;
     padding-left: 0.12em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-wordmark {
+    transition: none;
   }
 }
 </style>

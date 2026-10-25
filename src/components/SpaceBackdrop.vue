@@ -16,9 +16,9 @@ const trackStyle = {
 
 <style scoped>
 .space-backdrop {
-  position: absolute;
+  position: fixed;
+  z-index: -1;
   inset: 0;
-  z-index: -2;
   overflow: hidden;
   background: #000;
   pointer-events: none;

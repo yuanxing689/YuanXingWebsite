@@ -6,12 +6,13 @@ import {
   SCENE_START,
   writeIntroCss
 } from './introState.js'
+import { getBootParam } from '../runtime/bootParams.js'
 
-// 全站只保留一个 requestAnimationFrame：Anime 引擎由 logoScene 的渲染循环手动驱动。
-// 渲染循环里每帧先 engine.update()，再更新 uniform / 渲染，保证补间值当帧生效。
+// 全站只保留一个 requestAnimationFrame：Anime 引擎由 cosmicLoop 手动驱动。
+// 同一帧先 engine.update()，再更新 uniform / 渲染，保证补间值当帧生效。
 engine.useDefaultMainLoop = false
 
-const INTRO_PARAM = new URLSearchParams(window.location.search).get('intro')
+const INTRO_PARAM = getBootParam('intro')
 const FREEZE_SECONDS = INTRO_PARAM?.startsWith('freeze-') ? Number(INTRO_PARAM.slice(7)) : null
 const INTRO_SEEN_KEY = 'yuanxing:intro-seen'
 
