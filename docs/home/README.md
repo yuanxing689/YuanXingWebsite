@@ -41,7 +41,7 @@ order: 10
 如果要新增一个 section，只新建 Markdown 不够，还需要同时：
 
 1. 在 `docs/index.md` 注册对应 section 组件。
-2. 在 `src/composables/useSiteNavigation.js` 配置 `SECTION_POSITIONS`。
+2. 在 `src/components/chrome/useSiteNavigation.js` 配置 `SECTION_POSITIONS`。
 3. 检查桌面和手机章节布局。
 
 ## 正文怎么写

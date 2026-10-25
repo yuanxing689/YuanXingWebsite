@@ -15,7 +15,7 @@ import {
  * 导航星场景只负责自身资源、尺寸和单帧绘制。
  * 生命周期与 requestAnimationFrame 由 usePersistentCosmicScenes 统一管理。
  */
-export function createPersistentNavigationScene(canvas, {
+export function createNavigationScene(canvas, {
   getTargets = () => []
 } = {}) {
   const renderer = createCosmicRenderer(canvas)

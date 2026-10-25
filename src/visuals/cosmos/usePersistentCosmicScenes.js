@@ -8,7 +8,7 @@ import {
 import { getBootParam } from '../../app/runtime/bootParams.js'
 import { createCosmicLoop } from './cosmicLoop.js'
 import { createLogoScene } from './logoScene.js'
-import { createPersistentNavigationScene } from './persistentNavigationScene.js'
+import { createNavigationScene } from './navigationScene.js'
 
 const VISUAL_READY_TIMEOUT_MS = 4000
 
@@ -150,7 +150,7 @@ export function usePersistentCosmicScenes({
     }
 
     try {
-      navigationScene = createPersistentNavigationScene(
+      navigationScene = createNavigationScene(
         navigationCanvas.value,
         { getTargets: getNavigationTargets }
       )
