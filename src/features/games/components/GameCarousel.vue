@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import GameCarouselCard from './GameCarouselCard.vue'
 import {
   getGameCardKey,
@@ -374,8 +374,7 @@ function updateLayout() {
   applyLayout()
 }
 
-onMounted(async () => {
-  await nextTick()
+onMounted(() => {
   const viewport = viewportRef.value
   if (!viewport) return
 

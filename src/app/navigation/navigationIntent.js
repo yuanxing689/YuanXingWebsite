@@ -34,6 +34,29 @@ export function createGameReturnIntent({
 /**
  * @returns {import('./contracts.js').NavigationIntent}
  */
+export function createGameEntryIntent({
+  targetUrl,
+  cardKey
+}) {
+  return {
+    operation: NAVIGATION_OPERATIONS.ENTER_GAME,
+    targetUrl,
+    sectionId: 'games',
+    cardKey: cardKey || null,
+    history: HISTORY_STRATEGIES.PUSH,
+    transition: TRANSITION_STRATEGIES.SHARED_ELEMENTS,
+    restoration: {
+      restoreHome: false,
+      restoreSection: false,
+      restoreCard: false,
+      scroll: 'none'
+    }
+  }
+}
+
+/**
+ * @returns {import('./contracts.js').NavigationIntent}
+ */
 export function createHomeSectionIntent({
   targetUrl,
   sectionId,

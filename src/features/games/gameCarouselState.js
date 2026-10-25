@@ -4,12 +4,9 @@ import {
   homeReturnSnapshotStore
 } from '../home/restoration/homeReturnSnapshot.js'
 
-const RETURN_READY_TIMEOUT = 300
-
 export const returningGameKey = ref('')
 
-let resolveReturnReady = null
-let returnReadyPromise = Promise.resolve()
+let returnReady = false
 
 export function getGameCardKey(game) {
   const gameKey = game?.url || game?.id || game?.title || ''
@@ -41,27 +38,18 @@ export function captureGameReturn(gameKey) {
 
 export function beginGameReturn(gameKey) {
   returningGameKey.value = toSitePath(gameKey)
-  returnReadyPromise = new Promise((resolve) => {
-    resolveReturnReady = resolve
-  })
-}
-
-export function waitForGameCarouselReady() {
-  const timeout = new Promise((resolve) => {
-    window.setTimeout(resolve, RETURN_READY_TIMEOUT)
-  })
-
-  return Promise.race([returnReadyPromise, timeout])
+  returnReady = false
 }
 
 export function signalGameCarouselReady() {
-  const resolve = resolveReturnReady
-  resolveReturnReady = null
-  resolve?.()
+  returnReady = true
+}
+
+export function isGameCarouselReady() {
+  return returnReady
 }
 
 export function endGameReturn() {
   returningGameKey.value = ''
-  resolveReturnReady = null
-  returnReadyPromise = Promise.resolve()
+  returnReady = false
 }

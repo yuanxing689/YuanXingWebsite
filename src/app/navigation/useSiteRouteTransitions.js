@@ -19,11 +19,13 @@ import { createBrowserHistoryGateway } from './browserHistoryGateway.js'
 import { NAVIGATION_SOURCES } from './contracts.js'
 import { createHistoryTransitionBridge } from './historyTransitionBridge.js'
 import { createGameReturnIntent } from './navigationIntent.js'
+import { useNavigationCoordinator } from './navigationCoordinator.js'
 import { createVitePressRouterAdapter } from './vitePressRouterAdapter.js'
 import {
   createHomeRestorationService
 } from '../../features/home/restoration/homeRestorationService.js'
-import { useViewTransitionNavigation } from '../transitions/useViewTransitionNavigation.js'
+
+const ROUTE_CONTENT_FADE_MS = 180
 
 export function useSiteRouteTransitions({
   route,
@@ -47,7 +49,7 @@ export function useSiteRouteTransitions({
     ...(navigationContexts ? { contexts: navigationContexts } : {})
   })
   const { navigate: navigateWithTransition } =
-    useViewTransitionNavigation({ routerAdapter })
+    useNavigationCoordinator({ routerAdapter })
   const historyTransitionBridge = createHistoryTransitionBridge({
     contexts: routerAdapter.contexts,
     routerAdapter,
@@ -139,17 +141,18 @@ export function useSiteRouteTransitions({
       intent,
       waitForVisuals: () => waitForHomeVisuals(settledHref),
       runTransition: (target, options) =>
-        navigateWithTransition(target, options),
+        navigateWithTransition(target, {
+          ...options,
+          intent
+        }),
       onStarted() {
         committingGameReturn = true
       },
-      async afterCommit() {
-        await homeRestoration.restore(plan)
-        await nextTick()
+      afterCommit() {
+        homeRestoration.restoreCommitted(plan)
       },
-      async restoreDefault() {
-        await homeRestoration.restoreDefault()
-        await nextTick()
+      restoreDefault() {
+        homeRestoration.restoreDefault()
       },
       onFinished() {
         finishAutomaticGameReturn()
@@ -184,10 +187,16 @@ export function useSiteRouteTransitions({
       committingGameReturn = true
       const returnHref = toSiteHref('/#games')
       await waitForHomeVisuals(returnHref)
+      const intent = createGameReturnIntent({
+        targetUrl: returnHref,
+        sectionId: 'games',
+        cardKey: plan.cardKey,
+        fromHistoryTraversal: false
+      })
       await navigateWithTransition(returnHref, {
-        afterRouteChange: async () => {
-          await homeRestoration.restore(plan)
-          await nextTick()
+        intent,
+        afterRouteChange: () => {
+          homeRestoration.restoreCommitted(plan)
         }
       })
     } finally {
@@ -205,7 +214,9 @@ export function useSiteRouteTransitions({
     suspendHomeAlignment()
     homeHistory.suspend()
     routeLeaving.value = true
-    await new Promise((resolve) => window.setTimeout(resolve, 180))
+    await new Promise((resolve) => {
+      window.setTimeout(resolve, ROUTE_CONTENT_FADE_MS)
+    })
 
     try {
       await waitForHomeVisuals(href)

@@ -2,8 +2,7 @@ import { toSitePath } from '../../../app/navigation/sitePaths.js'
 import {
   beginGameReturn,
   endGameReturn,
-  rememberActiveGame,
-  waitForGameCarouselReady
+  rememberActiveGame
 } from '../../games/gameCarouselState.js'
 import { getScrollTargetTop } from '../scroll/usePageSectionSnap.js'
 import { homeReturnSnapshotStore } from './homeReturnSnapshot.js'
@@ -30,7 +29,6 @@ export function createHomeRestorationService({
   refresh = () => {},
   snapshots = homeReturnSnapshotStore,
   prepareCardReturn = beginGameReturn,
-  waitForCardReturn = waitForGameCarouselReady,
   finishCardReturn = endGameReturn,
   rememberCard = rememberActiveGame
 }) {
@@ -108,16 +106,14 @@ export function createHomeRestorationService({
     if (plan.cardKey) prepareCardReturn(plan.cardKey)
   }
 
-  async function restore(plan = activePlan) {
+  function restoreCommitted(plan = activePlan) {
     if (!isHome.value || !plan) return false
     activePlan = plan
 
-    if (plan.sectionId) await waitForTarget(plan.sectionId)
     applyPlan(plan)
 
     let cardRestored = !plan.cardKey
     if (plan.cardKey) {
-      await waitForCardReturn()
       const activeCard = document.querySelector(
         'a.game-card__link[aria-current="true"]'
       )
@@ -138,8 +134,14 @@ export function createHomeRestorationService({
     }
   }
 
-  async function restoreDefault() {
-    return restore(createPlan({
+  async function restore(plan = activePlan) {
+    if (!isHome.value || !plan) return false
+    if (plan.sectionId) await waitForTarget(plan.sectionId)
+    return restoreCommitted(plan)
+  }
+
+  function restoreDefault() {
+    return restoreCommitted(createPlan({
       defaultSection: DEFAULT_SECTION_ID
     }))
   }
@@ -160,6 +162,7 @@ export function createHomeRestorationService({
   return {
     createPlan,
     prepare,
+    restoreCommitted,
     restore,
     restoreDefault,
     capture,

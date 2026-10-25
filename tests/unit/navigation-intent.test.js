@@ -6,6 +6,7 @@ import {
   TRANSITION_STRATEGIES
 } from '../../src/app/navigation/contracts.js'
 import {
+  createGameEntryIntent,
   createGameReturnIntent,
   createHomeSectionIntent
 } from '../../src/app/navigation/navigationIntent.js'
@@ -47,4 +48,16 @@ test('浏览器后退的游戏返回使用同 URL 桥接策略', () => {
     restoreCard: true,
     scroll: 'snapshot'
   })
+})
+
+test('卡片进入详情使用普通 push 与共享元素策略', () => {
+  const intent = createGameEntryIntent({
+    targetUrl: 'http://localhost/games/example/',
+    cardKey: '/games/example/'
+  })
+
+  assert.equal(intent.operation, NAVIGATION_OPERATIONS.ENTER_GAME)
+  assert.equal(intent.history, HISTORY_STRATEGIES.PUSH)
+  assert.equal(intent.transition, TRANSITION_STRATEGIES.SHARED_ELEMENTS)
+  assert.equal(intent.restoration.restoreHome, false)
 })

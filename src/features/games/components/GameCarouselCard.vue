@@ -1,6 +1,11 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { useViewTransitionNavigation } from '../../../app/transitions/useViewTransitionNavigation.js'
+import {
+  useNavigationCoordinator
+} from '../../../app/navigation/navigationCoordinator.js'
+import {
+  createGameEntryIntent
+} from '../../../app/navigation/navigationIntent.js'
 import { toSiteHref } from '../../../app/navigation/sitePaths.js'
 import { getGameStatusLabel } from '../gameStatus.js'
 import {
@@ -33,7 +38,7 @@ const statusTransitionName = computed(
 const isReturnTarget = computed(
   () => props.transitionKey === getGameCardKey(props.game)
 )
-const { navigate } = useViewTransitionNavigation()
+const { navigate } = useNavigationCoordinator()
 const coverElementRef = ref(null)
 const titleElementRef = ref(null)
 const statusElementRef = ref(null)
@@ -64,9 +69,16 @@ function handleNavigate(event) {
     element?.style.setProperty('view-transition-name', transitionName)
   })
 
-  captureGameReturn(getGameCardKey(props.game))
+  const cardKey = getGameCardKey(props.game)
+  const target = toSiteHref(props.game.url)
+  captureGameReturn(cardKey)
   event.preventDefault()
-  navigate(toSiteHref(props.game.url)).finally(() => {
+  navigate(target, {
+    intent: createGameEntryIntent({
+      targetUrl: new URL(target, window.location.origin).href,
+      cardKey
+    })
+  }).finally(() => {
     transitionElements.forEach(([element]) => {
       element?.style.removeProperty('view-transition-name')
     })
