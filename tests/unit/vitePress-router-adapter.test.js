@@ -34,24 +34,37 @@ function createEnvironment() {
       calls.push(href)
     }
   }
-  return { calls, listeners, router, windowRef }
+  const traversalCapture = {
+    subscribe(subscriber) {
+      listeners.push(subscriber)
+      return () => {
+        const index = listeners.indexOf(subscriber)
+        if (index >= 0) listeners.splice(index, 1)
+      }
+    },
+    emit(href, historyLength = 4) {
+      listeners.forEach((subscriber) => {
+        subscriber({ href, historyLength })
+      })
+    }
+  }
+  return { calls, listeners, router, traversalCapture, windowRef }
 }
 
 test('Router Adapter 只在 capture 阶段建立一次历史遍历上下文', () => {
-  const { listeners, router, windowRef } = createEnvironment()
+  const { listeners, router, traversalCapture, windowRef } =
+    createEnvironment()
   const contexts = createNavigationContextStore()
   const adapter = createVitePressRouterAdapter(router, {
     contexts,
+    traversalCapture,
     windowRef
   })
   const uninstall = adapter.install()
 
   assert.equal(listeners.length, 1)
-  assert.equal(listeners[0].type, 'popstate')
-  assert.equal(listeners[0].capture, true)
 
-  windowRef.location.href = 'http://localhost/#games'
-  listeners[0].listener({})
+  traversalCapture.emit('http://localhost/#games', 4)
   const context = contexts.getCurrent()
   assert.equal(context.source, NAVIGATION_SOURCES.HISTORY_TRAVERSAL)
   assert.equal(context.phase, NAVIGATION_PHASES.PENDING)
@@ -62,12 +75,15 @@ test('Router Adapter 只在 capture 阶段建立一次历史遍历上下文', ()
 })
 
 test('钩子按安装前的处理器、订阅顺序组合', async () => {
-  const { router, windowRef } = createEnvironment()
+  const { router, traversalCapture, windowRef } = createEnvironment()
   const order = []
   router.onBeforePageLoad = async () => {
     order.push('previous')
   }
-  const adapter = createVitePressRouterAdapter(router, { windowRef })
+  const adapter = createVitePressRouterAdapter(router, {
+    traversalCapture,
+    windowRef
+  })
   const uninstall = adapter.install({
     async onBeforePageLoad() {
       order.push('subscriber')
@@ -80,10 +96,11 @@ test('钩子按安装前的处理器、订阅顺序组合', async () => {
 })
 
 test('普通导航使用 Adapter 且恢复最新 URL 不产生额外语义', async () => {
-  const { calls, router, windowRef } = createEnvironment()
+  const { calls, router, traversalCapture, windowRef } = createEnvironment()
   const contexts = createNavigationContextStore()
   const adapter = createVitePressRouterAdapter(router, {
     contexts,
+    traversalCapture,
     windowRef
   })
   const uninstall = adapter.install()

@@ -62,6 +62,8 @@ export function useViewTransitionNavigation({
 
   async function navigate(href, {
     afterRouteChange = null,
+    navigationContext = null,
+    navigationSource = null,
     onFinished = null,
     preempt = false,
     shouldCommitRoute = null
@@ -75,7 +77,10 @@ export function useViewTransitionNavigation({
     let routeUpdated = false
     const updateRoute = async () => {
       if (shouldCommitRoute && !shouldCommitRoute()) return false
-      await adapter.navigate(href)
+      await adapter.navigate(href, {
+        ...(navigationContext ? { context: navigationContext } : {}),
+        ...(navigationSource ? { source: navigationSource } : {})
+      })
       await nextTick()
       await afterRouteChange?.()
       routeUpdated = true
@@ -94,6 +99,7 @@ export function useViewTransitionNavigation({
 
     if (typeof document.startViewTransition === 'function') {
       let updateStarted = false
+      let updateError = null
       let transition = null
 
       await settleActiveTransition()
@@ -105,9 +111,13 @@ export function useViewTransitionNavigation({
         })
         activeTransition = transition
         await waitForTransitionEnd(transition)
-      } catch {
+      } catch (error) {
         // 动画被浏览器拒绝时仍要完成路由更新
-        if (!updateStarted) await updateRoute()
+        if (!updateStarted) {
+          await updateRoute()
+        } else {
+          updateError = error
+        }
       } finally {
         if (activeTransition === transition) {
           activeTransition = null
@@ -115,6 +125,7 @@ export function useViewTransitionNavigation({
         document.documentElement.classList.remove(TRANSITIONING_CLASS)
         finishNavigation(onFinished)
       }
+      if (updateError) throw updateError
       return routeUpdated
     }
 

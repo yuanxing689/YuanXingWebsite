@@ -2,6 +2,7 @@ import {
   NAVIGATION_PHASES,
   NAVIGATION_SOURCES
 } from './contracts.js'
+import { subscribeHistoryTraversal } from './historyTraversalCapture.js'
 import { createNavigationContextStore } from './navigationContext.js'
 
 const HOOK_NAMES = [
@@ -18,12 +19,15 @@ const HOOK_NAMES = [
  */
 export function createVitePressRouterAdapter(router, {
   windowRef = null,
-  contexts = createNavigationContextStore()
+  contexts = createNavigationContextStore(),
+  traversalCapture = null
 } = {}) {
   const subscribers = new Set()
   const previousHooks = {}
+  const debugEvents = []
   let installed = false
   let pendingNavigation = null
+  let unsubscribeTraversal = null
 
   function getWindow() {
     if (windowRef) return windowRef
@@ -38,11 +42,32 @@ export function createVitePressRouterAdapter(router, {
   }
 
   function beginNavigation(source, href, intent = null) {
-    return contexts.begin({
+    const context = contexts.begin({
       source,
       targetUrl: getTargetUrl(href),
       intent
     })
+    recordDebug('begin', context)
+    return context
+  }
+
+  function recordDebug(
+    type,
+    context,
+    href = null,
+    historyLength = null
+  ) {
+    if (!import.meta.env?.DEV) return
+    debugEvents.push({
+      type,
+      href,
+      contextId: context?.id ?? null,
+      source: context?.source ?? null,
+      phase: context?.phase ?? null,
+      invalidated: context?.invalidated ?? null,
+      historyLength
+    })
+    if (debugEvents.length > 40) debugEvents.shift()
   }
 
   function ensureNavigation(href, source = NAVIGATION_SOURCES.PROGRAMMATIC) {
@@ -91,31 +116,38 @@ export function createVitePressRouterAdapter(router, {
           )
         pendingNavigation = null
         contexts.advance(context, NAVIGATION_PHASES.PENDING)
+        recordDebug('before-route', context, href)
         return runHook('onBeforeRouteChange', href, context)
       }
 
       router.onBeforePageLoad = async (href) => {
         const context = ensureNavigation(href)
         contexts.advance(context, NAVIGATION_PHASES.PENDING)
+        recordDebug('before-page', context, href)
         return runHook('onBeforePageLoad', href, context)
       }
 
       router.onAfterRouteChange = async (href) => {
         const context = ensureNavigation(href)
         contexts.advance(context, NAVIGATION_PHASES.COMMITTED)
+        recordDebug('after-route', context, href)
         return runHook('onAfterRouteChange', href, context)
       }
 
-      const captureTraversal = () => {
+      const captureTraversal = ({ href, historyLength }) => {
         const context = beginNavigation(
           NAVIGATION_SOURCES.HISTORY_TRAVERSAL,
-          getWindow().location.href
+          href
         )
         contexts.advance(context, NAVIGATION_PHASES.PENDING)
+        recordDebug('popstate-capture', context, href, historyLength)
       }
 
-      install.captureTraversal = captureTraversal
-      getWindow().addEventListener('popstate', captureTraversal, true)
+      unsubscribeTraversal = traversalCapture
+        ? traversalCapture.subscribe(captureTraversal)
+        : subscribeHistoryTraversal(captureTraversal, {
+            windowRef: getWindow()
+          })
 
       if (!contexts.getCurrent()) {
         const initial = beginNavigation(
@@ -123,6 +155,13 @@ export function createVitePressRouterAdapter(router, {
           getWindow().location.href
         )
         contexts.advance(initial, NAVIGATION_PHASES.COMMITTED)
+      }
+      if (import.meta.env?.DEV) {
+        window.__yuanxingRouterAdapterDebug = {
+          getSnapshot() {
+            return debugEvents.map((event) => ({ ...event }))
+          }
+        }
       }
       installed = true
     }
@@ -139,14 +178,18 @@ export function createVitePressRouterAdapter(router, {
   function restore() {
     if (!installed) return
 
-    getWindow().removeEventListener('popstate', install.captureTraversal, true)
-    delete install.captureTraversal
+    unsubscribeTraversal?.()
+    unsubscribeTraversal = null
     HOOK_NAMES.forEach((name) => {
       router[name] = previousHooks[name]
       delete previousHooks[name]
     })
     subscribers.clear()
     pendingNavigation = null
+    debugEvents.length = 0
+    if (import.meta.env?.DEV && typeof window !== 'undefined') {
+      delete window.__yuanxingRouterAdapterDebug
+    }
     installed = false
   }
 

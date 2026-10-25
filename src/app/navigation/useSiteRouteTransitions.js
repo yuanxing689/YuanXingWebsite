@@ -19,11 +19,16 @@ import {
   toSiteHref
 } from './sitePaths.js'
 import { createBrowserHistoryGateway } from './browserHistoryGateway.js'
+import {
+  HISTORY_STRATEGIES,
+  NAVIGATION_OPERATIONS,
+  NAVIGATION_SOURCES,
+  TRANSITION_STRATEGIES
+} from './contracts.js'
+import { createHistoryTransitionBridge } from './historyTransitionBridge.js'
 import { createVitePressRouterAdapter } from './vitePressRouterAdapter.js'
 import { getScrollTargetTop } from '../../features/home/scroll/usePageSectionSnap.js'
 import { useViewTransitionNavigation } from '../transitions/useViewTransitionNavigation.js'
-
-const RETURN_INPUT_SETTLE_MS = 100
 
 export function useSiteRouteTransitions({
   route,
@@ -45,12 +50,15 @@ export function useSiteRouteTransitions({
   const routerAdapter = createVitePressRouterAdapter(router)
   const { navigate: navigateWithTransition } =
     useViewTransitionNavigation({ routerAdapter })
+  const historyTransitionBridge = createHistoryTransitionBridge({
+    contexts: routerAdapter.contexts,
+    routerAdapter,
+    historyGateway
+  })
   let previousScrollRestoration = 'auto'
   let uninstallRouterHooks = null
-  let gameReturnTimer = 0
-  let pendingReturnHref = ''
-  let gameReturnRequestId = 0
   let committingGameReturn = false
+  let automaticReturnPending = false
 
   watch(isGamePage, (gamePage) => {
     if (gamePage && typeof window !== 'undefined') {
@@ -69,11 +77,6 @@ export function useSiteRouteTransitions({
     } catch {
       return document.getElementById(anchorId)
     }
-  }
-
-  function getLocationKey(href = window.location.href) {
-    const url = new URL(href, window.location.origin)
-    return `${url.pathname}${url.search}${url.hash}`
   }
 
   function applyHomeAnchor(anchor) {
@@ -179,17 +182,39 @@ export function useSiteRouteTransitions({
     })
   }
 
-  function interceptGameReturn(href) {
-    if (routeLeaving.value || committingGameReturn) return
-    if (!isGamePage.value) return
+  function finishAutomaticGameReturn() {
+    if (!automaticReturnPending) return
+
+    automaticReturnPending = false
+    committingGameReturn = false
+    endGameReturn()
+    gameReturnPending.value = false
+    resumeHomeAlignment()
+    homeHistory.resume()
+  }
+
+  function interceptGameReturn(href, navigationContext) {
+    if (routeLeaving.value) return
 
     const targetPath = normalizeSitePath(
       new URL(href, window.location.origin).pathname
     )
-    if (targetPath !== normalizeSitePath(siteHomePath.value)) return
-
+    if (navigationContext?.source !== NAVIGATION_SOURCES.HISTORY_TRAVERSAL) {
+      return
+    }
     const gameKey = readActiveGameKey()
-    if (!gameKey) return
+    const isGameCatalogReturn =
+      isGamePage.value &&
+      targetPath === normalizeSitePath(siteHomePath.value) &&
+      Boolean(gameKey)
+
+    if (!isGameCatalogReturn) {
+      if (automaticReturnPending) {
+        historyTransitionBridge.cancel('traversal-superseded')
+        finishAutomaticGameReturn()
+      }
+      return
+    }
 
     if (!gameReturnPending.value) {
       gameReturnPending.value = true
@@ -198,46 +223,55 @@ export function useSiteRouteTransitions({
       beginGameReturn(gameKey)
     }
 
-    const returnHref = new URL(href, window.location.origin).href
-    const requestId = ++gameReturnRequestId
-    pendingReturnHref = returnHref
-    window.clearTimeout(gameReturnTimer)
-    gameReturnTimer = window.setTimeout(() => {
-      gameReturnTimer = 0
-      if (requestId !== gameReturnRequestId || !pendingReturnHref) return
+    const settledHref = historyGateway.getHref()
+    const returnAnchor = new URL(settledHref).hash || '#games'
+    const intent = {
+      operation: NAVIGATION_OPERATIONS.RETURN_GAME_CATALOG,
+      targetUrl: settledHref,
+      sectionId: returnAnchor.replace(/^#/, ''),
+      cardKey: gameKey,
+      history: HISTORY_STRATEGIES.BRIDGE_SAME_URL,
+      transition: TRANSITION_STRATEGIES.SHARED_ELEMENTS,
+      restoration: {
+        restoreHome: true,
+        restoreSection: true,
+        restoreCard: true,
+        scroll: 'snapshot'
+      }
+    }
 
-      const settledHref = pendingReturnHref
-      pendingReturnHref = ''
-      const returnAnchor = new URL(settledHref).hash || '#games'
-      const returnLocation = getLocationKey(settledHref)
+    automaticReturnPending = true
+    const started = historyTransitionBridge.request({
+      context: navigationContext,
+      intent,
+      waitForVisuals: () => waitForHomeVisuals(settledHref),
+      runTransition: (target, options) =>
+        navigateWithTransition(target, options),
+      onStarted() {
+        committingGameReturn = true
+      },
+      async afterCommit() {
+        await restoreHomeAnchor(returnAnchor)
+        await waitForGameCarouselReady()
+        await restoreHomeAnchor(returnAnchor)
+        await nextTick()
+        homeHistory.resume()
+      },
+      async restoreDefault() {
+        window.scrollTo({ top: 0, behavior: 'auto' })
+        refreshHomeScrollState()
+        await nextTick()
+        homeHistory.resume()
+      },
+      onFinished() {
+        finishAutomaticGameReturn()
+      }
+    })
 
-      committingGameReturn = true
-      void (async () => {
-        try {
-          await waitForHomeVisuals(settledHref)
-          await navigateWithTransition(settledHref, {
-            preempt: true,
-            shouldCommitRoute: () => getLocationKey() === returnLocation,
-            afterRouteChange: async () => {
-              await restoreHomeAnchor(returnAnchor)
-              await waitForGameCarouselReady()
-              await restoreHomeAnchor(returnAnchor)
-              await nextTick()
-              homeHistory.resume()
-            }
-          })
-        } catch {
-          // 路由更新失败时由 VitePress 的下一次页面加载恢复
-        } finally {
-          committingGameReturn = false
-          if (requestId !== gameReturnRequestId) return
-          endGameReturn()
-          gameReturnPending.value = false
-          resumeHomeAlignment()
-          homeHistory.resume()
-        }
-      })()
-    }, RETURN_INPUT_SETTLE_MS)
+    if (!started) {
+      finishAutomaticGameReturn()
+      return
+    }
 
     // 阻止 VitePress 在旧页面状态下先完成这次返回。
     return false
@@ -380,20 +414,26 @@ export function useSiteRouteTransitions({
     historyGateway.setScrollRestoration('manual')
 
     uninstallRouterHooks = routerAdapter.install({
-      onBeforeRouteChange(href) {
+      onBeforeRouteChange(href, navigationContext) {
+        if (
+          automaticReturnPending &&
+          navigationContext?.source === NAVIGATION_SOURCES.PROGRAMMATIC
+        ) {
+          historyTransitionBridge.cancel('programmatic-navigation')
+          finishAutomaticGameReturn()
+        }
         if (isHome.value) homeHistory.commitCurrentSection()
       },
-      onBeforePageLoad(href) {
-        return interceptGameReturn(href)
+      onBeforePageLoad(href, navigationContext) {
+        return interceptGameReturn(href, navigationContext)
       }
     })
   })
 
   onBeforeUnmount(() => {
-    gameReturnRequestId += 1
-    pendingReturnHref = ''
+    historyTransitionBridge.cancel('unmount')
+    automaticReturnPending = false
     committingGameReturn = false
-    window.clearTimeout(gameReturnTimer)
     uninstallRouterHooks?.()
     uninstallRouterHooks = null
     historyGateway.setScrollRestoration(previousScrollRestoration)
