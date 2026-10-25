@@ -7,27 +7,22 @@ import {
 } from 'vue'
 import { useRouter } from 'vitepress'
 import {
-  beginGameReturn,
-  endGameReturn,
   getGameCardKey,
   readActiveGameKey,
-  rememberActiveGame,
-  waitForGameCarouselReady
+  rememberActiveGame
 } from '../../features/games/gameCarouselState.js'
 import {
   normalizeSitePath,
   toSiteHref
 } from './sitePaths.js'
 import { createBrowserHistoryGateway } from './browserHistoryGateway.js'
-import {
-  HISTORY_STRATEGIES,
-  NAVIGATION_OPERATIONS,
-  NAVIGATION_SOURCES,
-  TRANSITION_STRATEGIES
-} from './contracts.js'
+import { NAVIGATION_SOURCES } from './contracts.js'
 import { createHistoryTransitionBridge } from './historyTransitionBridge.js'
+import { createGameReturnIntent } from './navigationIntent.js'
 import { createVitePressRouterAdapter } from './vitePressRouterAdapter.js'
-import { getScrollTargetTop } from '../../features/home/scroll/usePageSectionSnap.js'
+import {
+  createHomeRestorationService
+} from '../../features/home/restoration/homeRestorationService.js'
 import { useViewTransitionNavigation } from '../transitions/useViewTransitionNavigation.js'
 
 export function useSiteRouteTransitions({
@@ -41,19 +36,27 @@ export function useSiteRouteTransitions({
   suspendHomeAlignment = () => {},
   resumeHomeAlignment = () => {},
   waitForHomeVisuals = () => Promise.resolve(),
-  homeHistory
+  homeHistory,
+  navigationContexts = null
 }) {
   const routeLeaving = ref(false)
   const gameReturnPending = ref(false)
   const router = useRouter()
   const historyGateway = createBrowserHistoryGateway()
-  const routerAdapter = createVitePressRouterAdapter(router)
+  const routerAdapter = createVitePressRouterAdapter(router, {
+    ...(navigationContexts ? { contexts: navigationContexts } : {})
+  })
   const { navigate: navigateWithTransition } =
     useViewTransitionNavigation({ routerAdapter })
   const historyTransitionBridge = createHistoryTransitionBridge({
     contexts: routerAdapter.contexts,
     routerAdapter,
     historyGateway
+  })
+  const homeRestoration = createHomeRestorationService({
+    isHome,
+    scrollOffset,
+    refresh: refreshHomeScrollState
   })
   let previousScrollRestoration = 'auto'
   let uninstallRouterHooks = null
@@ -66,120 +69,13 @@ export function useSiteRouteTransitions({
     }
   }, { immediate: true })
 
-  function getAnchorId(anchor) {
-    const source = anchor ?? window.location.hash
-    return String(source).replace(/^#/, '')
-  }
-
-  function findAnchorTarget(anchorId) {
-    try {
-      return document.getElementById(decodeURIComponent(anchorId))
-    } catch {
-      return document.getElementById(anchorId)
-    }
-  }
-
-  function applyHomeAnchor(anchor) {
-    if (!isHome.value) return false
-
-    const anchorId = getAnchorId(anchor)
-    if (!anchorId) {
-      window.scrollTo({ top: 0, behavior: 'auto' })
-      refreshHomeScrollState()
-      return true
-    }
-
-    const target = findAnchorTarget(anchorId)
-    if (!target) return false
-
-    window.scrollTo({
-      top: getScrollTargetTop(target, scrollOffset),
-      behavior: 'auto'
-    })
-    refreshHomeScrollState()
-    return true
-  }
-
-  function waitForHomeAnchor(anchorId) {
-    return new Promise((resolve) => {
-      let observer = null
-      let timeout = 0
-
-      const finish = (target) => {
-        observer?.disconnect()
-        window.clearTimeout(timeout)
-        resolve(target)
-      }
-
-      const target = findAnchorTarget(anchorId)
-      if (target) {
-        finish(target)
-        return
-      }
-
-      observer = new MutationObserver(() => {
-        const nextTarget = findAnchorTarget(anchorId)
-        if (nextTarget) finish(nextTarget)
-      })
-      observer.observe(document.body, { childList: true, subtree: true })
-      timeout = window.setTimeout(() => finish(null), 800)
-    })
-  }
-
   async function restoreHomeAnchor(anchor) {
-    if (!isHome.value) return false
-
-    const anchorId = getAnchorId(anchor)
-    if (!anchorId) return applyHomeAnchor()
-    if (!findAnchorTarget(anchorId)) {
-      await waitForHomeAnchor(anchorId)
-    }
-
-    return applyHomeAnchor(`#${anchorId}`)
-  }
-
-  function waitForStableHomeAnchor(anchor) {
-    return new Promise((resolve) => {
-      const anchorId = getAnchorId(anchor)
-      const startedAt = window.performance.now()
-      let previousTop = null
-      let stableFrames = 0
-
-      const check = () => {
-        if (!isHome.value) {
-          resolve(false)
-          return
-        }
-
-        const target = findAnchorTarget(anchorId)
-        const top = target
-          ? getScrollTargetTop(target, scrollOffset)
-          : null
-
-        if (
-          top !== null &&
-          previousTop !== null &&
-          Math.abs(top - previousTop) <= 0.1
-        ) {
-          stableFrames += 1
-        } else {
-          stableFrames = 0
-        }
-
-        previousTop = top
-        if (
-          stableFrames >= 2 ||
-          window.performance.now() - startedAt >= 350
-        ) {
-          resolve(top !== null)
-          return
-        }
-
-        window.requestAnimationFrame(check)
-      }
-
-      window.requestAnimationFrame(check)
+    const plan = homeRestoration.createPlan({
+      anchor: anchor ?? window.location.hash,
+      snapshot: null,
+      defaultSection: ''
     })
+    return homeRestoration.restore(plan)
   }
 
   function finishAutomaticGameReturn() {
@@ -187,7 +83,7 @@ export function useSiteRouteTransitions({
 
     automaticReturnPending = false
     committingGameReturn = false
-    endGameReturn()
+    homeRestoration.finish()
     gameReturnPending.value = false
     resumeHomeAlignment()
     homeHistory.resume()
@@ -220,27 +116,24 @@ export function useSiteRouteTransitions({
       gameReturnPending.value = true
       suspendHomeAlignment()
       homeHistory.suspend()
-      beginGameReturn(gameKey)
     }
 
     const settledHref = historyGateway.getHref()
-    const returnAnchor = new URL(settledHref).hash || '#games'
-    const intent = {
-      operation: NAVIGATION_OPERATIONS.RETURN_GAME_CATALOG,
+    const snapshot = homeRestoration.read()
+    const plan = homeRestoration.createPlan({
+      anchor: new URL(settledHref).hash,
+      snapshot,
+      defaultSection: 'games'
+    })
+    const intent = createGameReturnIntent({
       targetUrl: settledHref,
-      sectionId: returnAnchor.replace(/^#/, ''),
+      sectionId: plan.sectionId,
       cardKey: gameKey,
-      history: HISTORY_STRATEGIES.BRIDGE_SAME_URL,
-      transition: TRANSITION_STRATEGIES.SHARED_ELEMENTS,
-      restoration: {
-        restoreHome: true,
-        restoreSection: true,
-        restoreCard: true,
-        scroll: 'snapshot'
-      }
-    }
+      fromHistoryTraversal: true
+    })
 
     automaticReturnPending = true
+    homeRestoration.prepare(plan)
     const started = historyTransitionBridge.request({
       context: navigationContext,
       intent,
@@ -251,17 +144,12 @@ export function useSiteRouteTransitions({
         committingGameReturn = true
       },
       async afterCommit() {
-        await restoreHomeAnchor(returnAnchor)
-        await waitForGameCarouselReady()
-        await restoreHomeAnchor(returnAnchor)
+        await homeRestoration.restore(plan)
         await nextTick()
-        homeHistory.resume()
       },
       async restoreDefault() {
-        window.scrollTo({ top: 0, behavior: 'auto' })
-        refreshHomeScrollState()
+        await homeRestoration.restoreDefault()
         await nextTick()
-        homeHistory.resume()
       },
       onFinished() {
         finishAutomaticGameReturn()
@@ -282,7 +170,15 @@ export function useSiteRouteTransitions({
     gameReturnPending.value = true
     suspendHomeAlignment()
     homeHistory.suspend()
-    beginGameReturn(getGameCardKey({ url: route.path }))
+    const snapshot = homeRestoration.read()
+    const plan = homeRestoration.createPlan({
+      anchor: '#games',
+      snapshot,
+      defaultSection: 'games'
+    })
+    plan.cardKey =
+      plan.cardKey || getGameCardKey({ url: route.path })
+    homeRestoration.prepare(plan)
 
     try {
       committingGameReturn = true
@@ -290,17 +186,14 @@ export function useSiteRouteTransitions({
       await waitForHomeVisuals(returnHref)
       await navigateWithTransition(returnHref, {
         afterRouteChange: async () => {
-          await restoreHomeAnchor('games')
-          await waitForGameCarouselReady()
-          await restoreHomeAnchor('games')
+          await homeRestoration.restore(plan)
           await nextTick()
-          homeHistory.resume()
-        },
-        onFinished: endGameReturn
+        }
       })
     } finally {
       committingGameReturn = false
       gameReturnPending.value = false
+      homeRestoration.finish()
       resumeHomeAlignment()
       homeHistory.resume()
     }
@@ -318,9 +211,7 @@ export function useSiteRouteTransitions({
       await waitForHomeVisuals(href)
       await routerAdapter.navigate(href)
       await nextTick()
-      await restoreHomeAnchor()
-      await waitForStableHomeAnchor()
-      await restoreHomeAnchor()
+      await restoreHomeAnchor(window.location.hash)
       homeHistory.resume()
     } finally {
       resumeHomeAlignment()

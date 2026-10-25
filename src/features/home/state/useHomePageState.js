@@ -5,11 +5,16 @@ import {
   watch
 } from 'vue'
 
-export function useHomeScrollState({ isHome }) {
+/**
+ * 首页唯一状态所有者：滚动进度、视口、活动区块和待完成导航目标。
+ * 被动滚动只能更新 activeSection，不能覆盖尚未完成的 pendingSection。
+ */
+export function useHomePageState({ isHome }) {
   const viewport = ref({ width: 1440, height: 900 })
   const navigationViewport = ref({ width: 1440, height: 900 })
   const scrollProgress = ref(0)
   const activeSection = ref('')
+  const pendingSection = ref(null)
   let scrollFrame = 0
 
   function updateViewport() {
@@ -57,6 +62,14 @@ export function useHomeScrollState({ isHome }) {
     updateActiveSection()
   }
 
+  function setPendingSection(section) {
+    pendingSection.value = section || ''
+  }
+
+  function clearPendingSection() {
+    pendingSection.value = null
+  }
+
   function scheduleLayoutRefresh() {
     if (scrollFrame) return
 
@@ -66,7 +79,12 @@ export function useHomeScrollState({ isHome }) {
     })
   }
 
-  watch(isHome, refreshLayout, { flush: 'post' })
+  watch(isHome, (home) => {
+    if (!home) {
+      pendingSection.value = null
+    }
+    refreshLayout()
+  }, { flush: 'post' })
 
   onMounted(() => {
     window.addEventListener('scroll', scheduleLayoutRefresh, { passive: true })
@@ -100,6 +118,9 @@ export function useHomeScrollState({ isHome }) {
     navigationViewport,
     scrollProgress,
     activeSection,
+    pendingSection,
+    setPendingSection,
+    clearPendingSection,
     refreshLayout
   }
 }

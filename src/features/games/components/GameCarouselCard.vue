@@ -4,8 +4,8 @@ import { useViewTransitionNavigation } from '../../../app/transitions/useViewTra
 import { toSiteHref } from '../../../app/navigation/sitePaths.js'
 import { getGameStatusLabel } from '../gameStatus.js'
 import {
-  getGameCardKey,
-  rememberActiveGame
+  captureGameReturn,
+  getGameCardKey
 } from '../gameCarouselState.js'
 
 const props = defineProps({
@@ -64,7 +64,7 @@ function handleNavigate(event) {
     element?.style.setProperty('view-transition-name', transitionName)
   })
 
-  rememberActiveGame(getGameCardKey(props.game))
+  captureGameReturn(getGameCardKey(props.game))
   event.preventDefault()
   navigate(toSiteHref(props.game.url)).finally(() => {
     transitionElements.forEach(([element]) => {

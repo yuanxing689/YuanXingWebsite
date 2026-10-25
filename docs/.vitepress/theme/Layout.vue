@@ -12,8 +12,11 @@ import GameArticleHero from '../../../src/features/games/components/GameArticleH
 import PersistentSiteChrome from '../../../src/components/chrome/PersistentSiteChrome.vue'
 import NotFoundPage from '../../../src/app/NotFoundPage.vue'
 import { data as homeSections } from '../data/home.data.js'
+import {
+  createNavigationContextStore
+} from '../../../src/app/navigation/navigationContext.js'
 import { useHomeHistory } from '../../../src/features/home/history/useHomeHistory.js'
-import { useHomeScrollState } from '../../../src/features/home/scroll/useHomeScrollState.js'
+import { useHomePageState } from '../../../src/features/home/state/useHomePageState.js'
 import { useIntroController } from '../../../src/features/home/intro/useIntroController.js'
 import { usePageSectionSnap } from '../../../src/features/home/scroll/usePageSectionSnap.js'
 import { useSiteRouteTransitions } from '../../../src/app/navigation/useSiteRouteTransitions.js'
@@ -25,6 +28,7 @@ import {
 const route = useRoute()
 const { frontmatter, page, site } = useData()
 const siteChromeRef = ref(null)
+const navigationContexts = createNavigationContextStore()
 
 const siteHomePath = computed(() => normalizeSitePath(toSiteHref('/')))
 const isHome = computed(() => {
@@ -58,8 +62,11 @@ const {
   navigationViewport,
   scrollProgress,
   activeSection,
+  pendingSection,
+  setPendingSection,
+  clearPendingSection,
   refreshLayout
-} = useHomeScrollState({ isHome })
+} = useHomePageState({ isHome })
 
 const {
   scrollToSection,
@@ -71,7 +78,11 @@ const {
 })
 const homeHistory = useHomeHistory({
   isHome,
-  activeSection
+  activeSection,
+  pendingSection,
+  setPendingSection,
+  clearPendingSection,
+  navigationContexts
 })
 const {
   routeLeaving,
@@ -89,7 +100,8 @@ const {
   suspendHomeAlignment: suspendAutoAlignment,
   resumeHomeAlignment: resumeAutoAlignment,
   waitForHomeVisuals: prepareHomeVisualsBeforeNavigation,
-  homeHistory
+  homeHistory,
+  navigationContexts
 })
 
 function waitForChromeVisuals() {

@@ -1,7 +1,9 @@
 import { ref } from 'vue'
 import { toSitePath } from '../../app/navigation/sitePaths.js'
+import {
+  homeReturnSnapshotStore
+} from '../home/restoration/homeReturnSnapshot.js'
 
-const ACTIVE_GAME_KEY = 'yuanxing:active-game'
 const RETURN_READY_TIMEOUT = 300
 
 export const returningGameKey = ref('')
@@ -15,22 +17,26 @@ export function getGameCardKey(game) {
 }
 
 export function readActiveGameKey() {
-  try {
-    return toSitePath(window.sessionStorage.getItem(ACTIVE_GAME_KEY) || '')
-  } catch {
-    return ''
-  }
+  return toSitePath(homeReturnSnapshotStore.read()?.cardKey || '')
 }
 
 export function rememberActiveGame(gameKey) {
   const normalizedKey = toSitePath(gameKey)
   if (!normalizedKey) return
+  homeReturnSnapshotStore.updateCardKey(normalizedKey)
+}
 
-  try {
-    window.sessionStorage.setItem(ACTIVE_GAME_KEY, normalizedKey)
-  } catch {
-    // 存储不可用时保持当前会话行为
-  }
+export function captureGameReturn(gameKey) {
+  const cardKey = toSitePath(gameKey)
+  if (!cardKey) return null
+
+  const snapshot = homeReturnSnapshotStore.capture({
+    homeHash: window.location.hash,
+    cardKey,
+    scrollY: window.scrollY
+  })
+  if (snapshot) rememberActiveGame(cardKey)
+  return snapshot
 }
 
 export function beginGameReturn(gameKey) {
