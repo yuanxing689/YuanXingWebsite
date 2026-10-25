@@ -7,12 +7,9 @@ import { createLogoBloom } from './logoBloom.js'
 import {
   createCosmicCamera,
   createCosmicRenderer,
+  isSoftwareCosmicRenderer,
   resizeCosmicCamera
 } from './cosmicRuntime.js'
-import {
-  createNavigationStarField,
-  createNavigationStarUpdater
-} from './navigationStars.js'
 
 // 星体外观：哑光深蓝，体积交给模型本身，材质只做基础塑形
 const STAR_MATERIAL = {
@@ -132,10 +129,8 @@ export function createLogoScene(canvas, {
   animate = true,
   view = 'front',
   onLightUpdate,
-  onFrame,
   getLogoTarget,
-  getMainLogoOpacity,
-  getNavigationTargets
+  getMainLogoOpacity
 } = {}) {
   const renderer = createCosmicRenderer(canvas)
 
@@ -182,15 +177,10 @@ export function createLogoScene(canvas, {
   root.scale.setScalar(MODEL_SCALE)
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
-  const navigationField = getNavigationTargets
-    ? createNavigationStarField({ count: 3 })
-    : null
-  if (navigationField) scene.add(navigationField.group)
-  const updateNavigationStars = navigationField
-    ? createNavigationStarUpdater(navigationField)
-    : null
 
-  const bloom = createLogoBloom(renderer, scene, camera)
+  const bloom = createLogoBloom(renderer, scene, camera, {
+    enabled: !isSoftwareCosmicRenderer(renderer)
+  })
 
   // 开场动画状态：由外部时间轴（Anime.js）直接改写，渲染循环每帧读取并应用
   const intro = {
@@ -212,9 +202,7 @@ export function createLogoScene(canvas, {
   const pointer = { x: 0, y: 0 }
   const targetTilt = { x: 0, y: 0 }
   const currentTilt = { x: 0, y: 0 }
-  let frameId = 0
-  let elapsed = 0
-  let lastTime = performance.now()
+  let active = true
   const starLightWorldPosition = new THREE.Vector3()
   const starLightScreenPosition = new THREE.Vector3()
 
@@ -230,7 +218,6 @@ export function createLogoScene(canvas, {
     cosmicMaterials.starGlow.uniforms.uOpacity.value = mainLogoOpacity
     starLight.intensity = STAR_LIGHT_INTENSITY * intro.light
     bloom.setIntensity(intro.bloom)
-    navigationField?.setIntro([intro.nav1, intro.nav2, intro.nav3])
   }
 
   function resize() {
@@ -241,7 +228,6 @@ export function createLogoScene(canvas, {
     resizeCosmicCamera(camera, width, height)
     root.scale.setScalar(MODEL_SCALE)
     applyIntro()
-    bloom.render()
   }
 
   function updateLogoFromTarget() {
@@ -290,13 +276,9 @@ export function createLogoScene(canvas, {
     pointer.y = 0
   }
 
-  function tick() {
-    const now = performance.now()
-    const delta = Math.min((now - lastTime) / 1000, 0.05)
-    lastTime = now
-    elapsed += delta
+  function update({ elapsed, delta }) {
+    if (!active) return
 
-    onFrame?.({ root, scene, camera, renderer, elapsed })
     applyIntro()
 
     // 固定正视相机，小幅转动整个徽章，保留原图交汇点与主轮廓。
@@ -320,14 +302,6 @@ export function createLogoScene(canvas, {
     if (root.visible && !getLogoTarget?.()) {
       root.position.y += Math.sin(elapsed * 0.45) * 0.008 * motionScale
     }
-    updateNavigationStars?.({
-      targets: getNavigationTargets?.() ?? [],
-      bounds: canvas.getBoundingClientRect(),
-      camera,
-      elapsed,
-      reducedMotion: reducedMotion.matches
-    })
-    navigationField?.update(motionEnabled ? elapsed : 0, motionEnabled)
     root.updateMatrixWorld()
     starLight.getWorldPosition(starLightWorldPosition)
     starLightScreenPosition.copy(starLightWorldPosition).project(camera)
@@ -345,9 +319,16 @@ export function createLogoScene(canvas, {
     cosmicMaterials.ribbon.uniforms.uStarLightPower.value = starLight.intensity
     cosmicMaterials.ribbon.uniforms.uStarLightRange.value = starLight.distance
     cosmicMaterials.ribbon.uniforms.uStarLightDecay.value = starLight.decay
+  }
 
+  function render() {
+    if (!active) return
     bloom.render()
-    frameId = requestAnimationFrame(tick)
+  }
+
+  function setActive(nextActive) {
+    active = Boolean(nextActive)
+    if (!active) root.visible = false
   }
 
   const ro = new ResizeObserver(resize)
@@ -356,14 +337,16 @@ export function createLogoScene(canvas, {
   window.addEventListener('blur', onPointerLeave)
   document.documentElement.addEventListener('pointerleave', onPointerLeave)
   resize()
-  tick()
 
   return {
     root,
     parts,
     intro,
+    resize,
+    update,
+    render,
+    setActive,
     destroy() {
-      cancelAnimationFrame(frameId)
       ro.disconnect()
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('blur', onPointerLeave)
@@ -377,7 +360,6 @@ export function createLogoScene(canvas, {
       cosmicMaterials.star.dispose()
       cosmicMaterials.ribbon.dispose()
       cosmicMaterials.starGlow.dispose()
-      navigationField?.dispose()
       bloom.dispose()
       environment.dispose()
       renderer.dispose()

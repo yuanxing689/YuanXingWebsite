@@ -8,7 +8,20 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 /** 保留模型原始透明度，只在明亮轮廓附近叠加短距离泛光。 */
 const BASE_STRENGTH = 0.8
 
-export function createLogoBloom(renderer, scene, camera) {
+export function createLogoBloom(renderer, scene, camera, {
+  enabled = true
+} = {}) {
+  if (!enabled) {
+    return {
+      render() {
+        renderer.render(scene, camera)
+      },
+      setIntensity() {},
+      resize() {},
+      dispose() {}
+    }
+  }
+
   const composer = new EffectComposer(renderer)
   const renderPass = new RenderPass(scene, camera)
   const original = new SavePass()

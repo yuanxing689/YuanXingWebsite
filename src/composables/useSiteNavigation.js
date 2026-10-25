@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { computed, toValue } from 'vue'
 import { toSiteHref } from '../navigation/sitePaths.js'
 
 const MOBILE_BREAKPOINT = 680
@@ -38,14 +38,16 @@ export function useSiteNavigation({
   isHome,
   activeSection
 }) {
-  const navigationSections = [...(sections || [])]
-    .filter((section) => SECTION_POSITIONS[section.id])
-    .sort((a, b) => (a.meta.order ?? 999) - (b.meta.order ?? 999))
-    .map((section) => ({
-      id: section.id,
-      label: section.meta.navLabel || section.meta.title || section.id,
-      scattered: SECTION_POSITIONS[section.id]
-    }))
+  const navigationSections = computed(() =>
+    [...(toValue(sections) || [])]
+      .filter((section) => SECTION_POSITIONS[section.id])
+      .sort((a, b) => (a.meta.order ?? 999) - (b.meta.order ?? 999))
+      .map((section) => ({
+        id: section.id,
+        label: section.meta.navLabel || section.meta.title || section.id,
+        scattered: SECTION_POSITIONS[section.id]
+      }))
+  )
 
   /** @type {import('vue').ComputedRef<SiteNavigationItem[]>} */
   const items = computed(() => {
@@ -54,10 +56,10 @@ export function useSiteNavigation({
     const easedProgress = smoothstep(progress)
     const mobile = width <= MOBILE_BREAKPOINT
 
-    return navigationSections.map((section, index) => {
+    return navigationSections.value.map((section, index) => {
       const scattered = mobile ? section.scattered.mobile : section.scattered.desktop
       const settledX = mobile
-        ? (index + 0.5) / navigationSections.length
+        ? (index + 0.5) / navigationSections.value.length
         : (width - DESKTOP_NAVIGATION_RIGHT_OFFSET + index * DESKTOP_NAVIGATION_SPACING) / width
       const settledY = mobile
         ? height - MOBILE_NAVIGATION_CENTER_OFFSET

@@ -3,7 +3,7 @@ import { applyIntroEndState } from '../intro/introState.js'
 
 export function useIntroController({
   isHome,
-  logoHeroRef
+  getHomeScene
 }) {
   const introLocked = ref(isHome.value)
   const sceneFailed = ref(false)
@@ -18,6 +18,8 @@ export function useIntroController({
     document.documentElement.classList.toggle('intro-locked', locked)
   }
 
+  setIntroLock(introLocked.value)
+
   function applyStaticPageVisuals() {
     document.documentElement.style.setProperty('--intro-backdrop', '1')
   }
@@ -26,8 +28,6 @@ export function useIntroController({
     introHandle?.dispose()
     introHandle = null
     introLoadFailed = false
-    sceneReady = false
-    sceneFailed.value = false
   }
 
   function finishIntro() {
@@ -39,7 +39,7 @@ export function useIntroController({
   }
 
   function applyLoadFallback() {
-    const scene = sceneReady ? logoHeroRef.value?.getScene?.() ?? null : null
+    const scene = sceneReady ? getHomeScene?.() ?? null : null
     applyIntroEndState(scene)
     setIntroLock(false)
   }
@@ -64,7 +64,7 @@ export function useIntroController({
     if (!sceneReady && !sceneFailed.value) return
 
     introHandle = introModule.initIntro({
-      scene: sceneReady ? logoHeroRef.value?.getScene?.() ?? null : null,
+      scene: sceneReady ? getHomeScene?.() ?? null : null,
       onComplete: finishIntro
     })
   }
@@ -104,6 +104,11 @@ export function useIntroController({
     applyStaticPageVisuals()
   }
 
+  function prepareHomeVisualScene() {
+    applyIntroEndState(getHomeScene?.() ?? null)
+    setIntroLock(false)
+  }
+
   onBeforeUnmount(() => {
     resetIntro()
     setIntroLock(false)
@@ -114,6 +119,7 @@ export function useIntroController({
     sceneFailed,
     enterHome,
     leaveHome,
+    prepareHomeVisualScene,
     updateSceneFrame,
     handleSceneReady,
     handleSceneError

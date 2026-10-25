@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import {
   createCosmicCamera,
   createCosmicRenderer,
+  isSoftwareCosmicRenderer,
   resizeCosmicCamera
 } from './cosmicRuntime.js'
 import { createLogoBloom } from './logoBloom.js'
@@ -10,26 +11,23 @@ import {
   createNavigationStarUpdater
 } from './navigationStars.js'
 
-export function createNavigationStarScene(canvas, {
+/**
+ * 导航星场景只负责自身资源、尺寸和单帧绘制。
+ * 生命周期与 requestAnimationFrame 由 usePersistentCosmicScenes 统一管理。
+ */
+export function createPersistentNavigationScene(canvas, {
   getTargets = () => []
 } = {}) {
   const renderer = createCosmicRenderer(canvas)
-
   const scene = new THREE.Scene()
   const camera = createCosmicCamera()
-
   const field = createNavigationStarField({ count: 3 })
-  field.setIntro([1, 1, 1])
-  scene.add(field.group)
-
-  const bloom = createLogoBloom(renderer, scene, camera)
+  const updateStars = createNavigationStarUpdater(field)
+  const bloom = createLogoBloom(renderer, scene, camera, {
+    enabled: !isSoftwareCosmicRenderer(renderer)
+  })
   bloom.setIntensity(1)
-
-  const updateNavigationStars = createNavigationStarUpdater(field)
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
-  let frameId = 0
-  let elapsed = 0
-  let lastTime = performance.now()
+  scene.add(field.group)
 
   function resize() {
     const width = canvas.clientWidth || window.innerWidth
@@ -39,32 +37,35 @@ export function createNavigationStarScene(canvas, {
     resizeCosmicCamera(camera, width, height)
   }
 
-  function render(timestamp) {
-    const delta = Math.min((timestamp - lastTime) / 1000, 0.05)
-    lastTime = timestamp
-    elapsed += delta
+  function setIntro(reveals) {
+    field.setIntro(reveals)
+  }
 
-    const motionEnabled = !reducedMotion.matches
-    updateNavigationStars({
+  function update({ elapsed, reducedMotion = false }) {
+    updateStars({
       targets: getTargets(),
       bounds: canvas.getBoundingClientRect(),
       camera,
       elapsed,
-      reducedMotion: !motionEnabled
+      reducedMotion
     })
-    field.update(motionEnabled ? elapsed : 0, motionEnabled)
-    bloom.render()
-    frameId = window.requestAnimationFrame(render)
+    field.update(reducedMotion ? 0 : elapsed, !reducedMotion)
   }
 
-  resize()
+  function render() {
+    bloom.render()
+  }
+
   const resizeObserver = new ResizeObserver(resize)
   resizeObserver.observe(canvas)
-  frameId = window.requestAnimationFrame(render)
+  resize()
 
   return {
+    resize,
+    setIntro,
+    update,
+    render,
     destroy() {
-      window.cancelAnimationFrame(frameId)
       resizeObserver.disconnect()
       field.dispose()
       bloom.dispose()

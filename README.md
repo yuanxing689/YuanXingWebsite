@@ -65,10 +65,11 @@ npm run test:e2e
 │  ├─ components/
 │  │  ├─ home/                     # 首页 section
 │  │  ├─ games/                    # 游戏轮播、封面和详情页头部
-│  │  └─ navigation/               # 站点导航和详情页导航星画布
+│  │  └─ navigation/               # 持久站点视觉层、品牌、玻璃和导航
 │  ├─ composables/                 # 导航、滚动、页面显现和路由过渡
 │  ├─ layout/                      # 品牌几何等纯布局计算
 │  ├─ intro/                       # 首页开场时间轴
+│  ├─ runtime/                     # 应用启动参数等运行期基础状态
 │  └─ three/                       # Three.js 场景、几何、材质和后处理
 ├─ tests/e2e/                      # Playwright 浏览器回归测试
 └─ playwright.config.js            # Playwright 测试服务器与浏览器配置
@@ -80,14 +81,14 @@ npm run test:e2e
 
 ### Layout
 
-`docs/.vitepress/theme/Layout.vue` 是全站组合层，负责：
+`docs/.vitepress/theme/Layout.vue` 是页面组合层，负责：
 
 - 首页和游戏详情页切换。
-- 首页场景、开场锁定和滚动进度。
-- 站点头部、导航目标位置和浏览器历史导航。
+- 首页正文、文章正文和语义标题。
+- 开场生命周期、滚动状态和站点路由协调。
 - 游戏详情页的 frontmatter 头部注入。
 - 浏览器后退、共享元素动画和首页锚点恢复。
-- 页面内容单独淡出，导航栏、星画布和毛玻璃背景保持可见。
+- 向 `PersistentSiteChrome.vue` 注入页面模式、区块数据和视口状态。
 
 具体职责已拆分到：
 
@@ -96,24 +97,36 @@ npm run test:e2e
 - `useSiteRouteTransitions.js`：品牌首页、章节导航、游戏返回和浏览器后退。
 - `navigation/sitePaths.js`：站内路径、站点 base 和浏览器最终地址的唯一转换入口。
 - `brandGeometry.js`：品牌 LOGO、锚点和字标的纯几何计算。
+- `runtime/bootParams.js`：冻结首次加载的 `intro`、`motion` 和 `view` 参数。
 
-组件本身尽量不直接承担路由和全站状态。新增功能时优先扩展对应模块，不再向 Layout 堆叠监听器和业务分支。
+`Layout` 不再直接组合品牌、字标、背景、导航 DOM 或 WebGL 画布。新增页面内容功能时，不应把持久视觉逻辑重新放回组合根。
 
-### 导航
+### 持久视觉层
 
-- `src/components/navigation/SiteHeader.vue`：品牌、导航链接、毛玻璃和降级星。
-- `src/composables/useSiteNavigation.js`：导航标签、链接和归一化坐标。
-- `src/navigation/sitePaths.js`：生成带 base 的最终地址，并提供跨部署状态的规范路径。
-- `src/components/LogoHero.vue` + `src/three/logoScene.js`：首页完整 3D 场景。
-- `src/components/navigation/NavigationStarCanvas.vue` + `src/three/navigationScene.js`：详情页导航专用 3D 场景。
+`src/components/navigation/PersistentSiteChrome.vue` 常驻 Layout，一次挂载后跨路由保持同一批 DOM：
 
-首页和详情页必须共用：
+- `SpaceBackdrop.vue`：固定星空背景。
+- `SiteBrandButton.vue`：唯一品牌入口、手机品牌玻璃和静态 LOGO。
+- `BrandWordmark.vue`：唯一视觉字标，不做首页/详情双实例。
+- `SiteNavigation.vue`：导航文字、毛玻璃和 WebGL 失败降级星。
+- 两个 WebGL canvas：正文下层首页主星，正文上层导航星。
 
-- `src/three/navigationStars.js` 的星星模型和变换 updater。
-- `src/three/cosmicRuntime.js` 的渲染器、相机和像素比配置。
-- 同一套尺寸、Shader、颜色、呼吸、旋转和 Bloom 参数。
+职责边界：
 
-同一页面最多运行一个 Three.js 持续渲染循环。不要在导航组件中再创建一套独立动画逻辑。
+- `useSiteNavigation.js` 只生成一套 DOM 与 Three.js 共用的归一化导航坐标。
+- `usePersistentCosmicScenes.js` 管理两块画布的场景生命周期、首帧 readiness、预绘制和销毁。
+- `logoScene.js` 只拥有首页主星场景，不创建 RAF，也不持有导航星。
+- `persistentNavigationScene.js` 只拥有常驻导航星场景、尺寸和单帧绘制。
+- `cosmicLoop.js` 是唯一持续 Three.js 调度器，同一帧依次驱动开场引擎、主星和导航星。
+- `cosmicRuntime.js`、`navigationStars.js` 和 `logoBloom.js` 继续提供共享渲染能力。
+
+主星场景离开首页时暂停绘制但保留资源；导航星场景始终活动。全站最多只有一个 Three.js 持续 RAF。不要在场景模块中新增独立循环。
+
+SwiftShader、llvmpipe 等软件 WebGL 环境使用较低像素比并跳过昂贵的 Bloom 后处理，保留星空、导航和交互能力；硬件 GPU 继续使用完整 Bloom 和原始视觉质量。
+
+导航玻璃出现前，首页主星 LOGO 先淡出并交给毛玻璃上方的唯一静态 LOGO。品牌按钮触发时，导航文字、两颗星画布、玻璃、品牌区和字标使用同一视觉透明度整体淡出淡入，背景不参与。
+
+进入首页的路由过渡会先在 View Transition 回调之外预激活并绘制主星。不要在 View Transition 更新回调里等待 rAF 首帧，否则会形成提交死锁。
 
 ### 首页
 
@@ -143,7 +156,7 @@ npm run test:e2e
 
 不支持 View Transitions 的浏览器会使用淡出淡入。减少动态效果模式下直接切页。
 
-导航链接由站点处理器接管，避免 VitePress 在进入首页前抢先执行 hash 滚动。“游戏目录”、其他首页锚点、首页内部导航和滚轮吸附共享同一套导航偏移落点。页面离场只淡出正文内容；固定导航、导航星和毛玻璃不参与透明度动画。
+导航链接由站点处理器接管，避免 VitePress 在进入首页前抢先执行 hash 滚动。“游戏目录”、其他首页锚点、首页内部导航和滚轮吸附共享同一套导航偏移落点。普通路由离场只淡出正文内容；品牌按钮是唯一会让整个导航视觉层整体淡出淡入的操作。
 
 ## 内容维护
 
@@ -272,7 +285,8 @@ yuanxing:intro-seen
 - 页面章节使用可取消的自定义对齐，不使用原生 Scroll Snap。
 - 浏览器滚动恢复设为手动模式；显式导航在 View Transition 捕获新快照前完成锚点定位。
 - 导航、区块滚动和自动吸附使用同一套 `scrollOffset + padding-top` 落点。
-- 页面离场只淡出内容层，固定导航和背景不改变坐标或透明度。
+- 页面离场只淡出内容层，持久导航视觉和背景不卸载。
+- 导航路由返回前预绘制首页主星，再启动 View Transition；回调内同步恢复锚点。
 - 游戏卡片的共享元素动画依赖 DOM 元素名称和轮播同步定位。
 - 修改轮播尺寸、封面比例或详情页头部时，必须复查进入和返回动画。
 
@@ -304,12 +318,16 @@ npm run build
 - 浏览器后退、直接访问详情页和刷新。
 - 返回游戏目录后恢复原卡片，无首卡闪烁或滚动错位。
 - 详情页返回首页时导航星不再下移，正文淡出期间导航栏和毛玻璃保持可见。
+- 首页、详情和返回过程中主星 canvas、导航 canvas、玻璃、品牌、字标和导航 DOM 身份不变。
+- Three.js 诊断状态只有一个持续调度器，导航相位在路由前后单调增长。
+- 主星 LOGO 在导航玻璃出现前完成与静态 LOGO 的交接。
+- 品牌按钮只触发一次整体视觉淡出淡入。
 - 导航返回后不再出现自动吸附造成的二次位移。
 - 首页封面使用 public 绝对路径，游戏正文图片使用各自目录内的相对路径。
 - `prefers-reduced-motion` 和无 WebGL 降级。
 - 浏览器控制台无错误。
 
-浏览器交互回归使用 Playwright，覆盖首页渲染、开场解锁、区块导航、游戏卡片返回、连续后退、手机轮播和资源清理。当前仍没有独立 lint 或格式化脚本；`npm run build` 和 `npm run test:e2e` 是主要质量检查。
+浏览器交互回归使用 Playwright，覆盖首页渲染、开场解锁、区块导航、游戏卡片返回、连续后退、手机轮播、资源清理、持久 DOM 身份、单渲染循环、品牌交接和 WebGL 降级。当前仍没有独立 lint 或格式化脚本；`npm run build` 和 `npm run test:e2e` 是主要质量检查。
 
 ## 构建与部署
 

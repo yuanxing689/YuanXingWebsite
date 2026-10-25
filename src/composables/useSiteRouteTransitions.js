@@ -33,6 +33,7 @@ export function useSiteRouteTransitions({
   refreshHomeScrollState = () => {},
   suspendHomeAlignment = () => {},
   resumeHomeAlignment = () => {},
+  waitForHomeVisuals = () => Promise.resolve(),
   homeHistory
 }) {
   const routeLeaving = ref(false)
@@ -207,26 +208,31 @@ export function useSiteRouteTransitions({
       const returnLocation = getLocationKey(settledHref)
 
       committingGameReturn = true
-      void navigateWithTransition(settledHref, {
-        preempt: true,
-        shouldCommitRoute: () => getLocationKey() === returnLocation,
-        afterRouteChange: async () => {
-          await restoreHomeAnchor(returnAnchor)
-          await waitForGameCarouselReady()
-          await restoreHomeAnchor(returnAnchor)
-          await nextTick()
+      void (async () => {
+        try {
+          await waitForHomeVisuals(settledHref)
+          await navigateWithTransition(settledHref, {
+            preempt: true,
+            shouldCommitRoute: () => getLocationKey() === returnLocation,
+            afterRouteChange: async () => {
+              await restoreHomeAnchor(returnAnchor)
+              await waitForGameCarouselReady()
+              await restoreHomeAnchor(returnAnchor)
+              await nextTick()
+              homeHistory.resume()
+            }
+          })
+        } catch {
+          // 路由更新失败时由 VitePress 的下一次页面加载恢复
+        } finally {
+          committingGameReturn = false
+          if (requestId !== gameReturnRequestId) return
+          endGameReturn()
+          gameReturnPending.value = false
+          resumeHomeAlignment()
           homeHistory.resume()
         }
-      }).catch(() => {
-        // 路由更新失败时由 VitePress 的下一次页面加载恢复
-      }).finally(() => {
-        committingGameReturn = false
-        if (requestId !== gameReturnRequestId) return
-        endGameReturn()
-        gameReturnPending.value = false
-        resumeHomeAlignment()
-        homeHistory.resume()
-      })
+      })()
     }, RETURN_INPUT_SETTLE_MS)
 
     // 阻止 VitePress 在旧页面状态下先完成这次返回。
@@ -242,7 +248,9 @@ export function useSiteRouteTransitions({
 
     try {
       committingGameReturn = true
-      await navigateWithTransition(toSiteHref('/#games'), {
+      const returnHref = toSiteHref('/#games')
+      await waitForHomeVisuals(returnHref)
+      await navigateWithTransition(returnHref, {
         afterRouteChange: async () => {
           await restoreHomeAnchor('games')
           await waitForGameCarouselReady()
@@ -269,6 +277,7 @@ export function useSiteRouteTransitions({
     await new Promise((resolve) => window.setTimeout(resolve, 180))
 
     try {
+      await waitForHomeVisuals(href)
       await router.go(href)
       await nextTick()
       await restoreHomeAnchor()
@@ -285,15 +294,19 @@ export function useSiteRouteTransitions({
 
   function navigateToHomeSection(target, sectionId) {
     homeHistory.pushSection(sectionId)
-    const started = scrollToSection(target, {
-      onFinished: (completed) => {
-        homeHistory.finishSectionNavigation(sectionId, completed)
+    return new Promise((resolve) => {
+      const started = scrollToSection(target, {
+        onFinished: (completed) => {
+          homeHistory.finishSectionNavigation(sectionId, completed)
+          resolve(completed)
+        }
+      })
+
+      if (!started) {
+        homeHistory.finishSectionNavigation(sectionId, false)
+        resolve(false)
       }
     })
-
-    if (!started) {
-      homeHistory.finishSectionNavigation(sectionId, false)
-    }
   }
 
   async function handleSectionNavigation(event, item) {
@@ -329,7 +342,9 @@ export function useSiteRouteTransitions({
     navigateToHomeSection(target, item.id)
   }
 
-  async function handleHomeNavigation(event) {
+  async function handleHomeNavigation(event, {
+    waitForCompletion = false
+  } = {}) {
     if (
       event.button !== 0 ||
       event.metaKey ||
@@ -346,7 +361,8 @@ export function useSiteRouteTransitions({
 
       event.preventDefault()
       event.stopPropagation()
-      navigateToHomeSection(hero, '')
+      const navigation = navigateToHomeSection(hero, '')
+      if (waitForCompletion) await navigation
       return
     }
 
