@@ -1,6 +1,6 @@
 import { defineConfig } from 'vitepress'
 import { createSiteImagePlugin } from './markdown/siteImages.js'
-import { SITE_SCROLL_OFFSET } from '../../src/navigation/siteScroll.js'
+import { SITE_SCROLL_OFFSET } from '../../src/app/navigation/siteScroll.js'
 
 const siteBase = process.env.SITE_BASE || '/'
 const normalizedBase = siteBase.endsWith('/') ? siteBase : `${siteBase}/`

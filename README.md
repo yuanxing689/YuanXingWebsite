@@ -39,7 +39,15 @@ npm run preview
 
 ```bash
 npx playwright install chromium
+npm run test:unit
 npm run test:e2e:baseline
+npm run test:e2e
+```
+
+硬件 Edge 使用系统已安装浏览器：
+
+```powershell
+$env:PLAYWRIGHT_BROWSER_CHANNEL='msedge'
 npm run test:e2e
 ```
 
@@ -62,48 +70,54 @@ npm run test:e2e
 │     ├─ data/                     # 首页和游戏数据加载器
 │     └─ theme/                    # Layout、主题样式和主题入口
 ├─ src/
-│  ├─ components/
-│  │  ├─ home/                     # 首页 section
-│  │  ├─ games/                    # 游戏轮播、封面和详情页头部
-│  │  └─ navigation/               # 持久站点视觉层、品牌、玻璃和导航
-│  ├─ composables/                 # 导航、滚动、页面显现和路由过渡
-│  ├─ layout/                      # 品牌几何等纯布局计算
-│  ├─ intro/                       # 首页开场时间轴
-│  ├─ runtime/                     # 应用启动参数等运行期基础状态
-│  └─ three/                       # Three.js 场景、几何、材质和后处理
-├─ tests/e2e/                      # Playwright 浏览器回归测试
+│  ├─ app/
+│  │  ├─ runtime/                  # 应用组合服务与启动参数
+│  │  ├─ navigation/               # 意图、策略、Adapter、历史桥接与协调器
+│  │  └─ transitions/              # 转场编排及原生/CSS 驱动
+│  ├─ components/chrome/           # 持久导航 DOM、品牌、字标与背景
+│  ├─ features/
+│  │  ├─ home/                     # 首页状态、滚动、开场、恢复和组件
+│  │  └─ games/                    # 轮播、卡片、详情页与游戏状态
+│  ├─ visuals/cosmos/              # 唯一 Three.js 循环、场景和材质
+│  └─ styles/                      # 全局样式
+├─ tests/
+│  ├─ unit/                        # node --test 纯逻辑契约测试
+│  └─ e2e/                         # Playwright 浏览器与视觉回归
 └─ playwright.config.js            # Playwright 测试服务器与浏览器配置
 ```
 
-构建缓存、截图和调试输出不应手工维护或提交。
+构建缓存和 `.screenshots/` 调试输出不应提交。`tests/e2e/visual.spec.js-snapshots/` 是有意维护的重构前后视觉基准，只能由基线提交生成，不能为通过测试而更新。
 
 ## 页面架构
 
 ### Layout
 
-`docs/.vitepress/theme/Layout.vue` 是页面组合层，负责：
+`docs/.vitepress/theme/Layout.vue` 只创建应用组合服务并声明页面结构，负责：
 
 - 首页和游戏详情页切换。
 - 首页正文、文章正文和语义标题。
-- 开场生命周期、滚动状态和站点路由协调。
 - 游戏详情页的 frontmatter 头部注入。
-- 浏览器后退、共享元素动画和首页锚点恢复。
-- 向 `PersistentSiteChrome.vue` 注入页面模式、区块数据和视口状态。
+- 向 `PersistentSiteChrome.vue` 注入应用服务提供的页面状态。
 
 具体职责已拆分到：
 
-- `useIntroController.js`：开场加载、锁定、降级和场景状态。
-- `useHomeScrollState.js`：唯一的首页滚动、可视视口和章节状态监听来源。
-- `useSiteRouteTransitions.js`：品牌首页、章节导航、游戏返回和浏览器后退。
-- `navigation/sitePaths.js`：站内路径、站点 base 和浏览器最终地址的唯一转换入口。
-- `brandGeometry.js`：品牌 LOGO、锚点和字标的纯几何计算。
-- `runtime/bootParams.js`：冻结首次加载的 `intro`、`motion` 和 `view` 参数。
+- `app/runtime/useSiteApplication.js`：创建首页、开场、历史和导航服务。
+- `app/navigation/navigationIntent.js`：集中生成目标、历史、转场和恢复策略。
+- `app/navigation/vitePressRouterAdapter.js`：统一 Router 钩子与历史遍历上下文。
+- `app/navigation/navigationCoordinator.js`：在目标确定后执行一次路由提交。
+- `app/navigation/historyTransitionBridge.js`：隔离浏览器后退的同 URL 单次桥接。
+- `app/transitions/transitionOrchestrator.js`：只负责 View Transition、CSS 降级、超时和清理。
+- `features/home/state/useHomePageState.js`：唯一的首页滚动、视口、活动区块和待完成目标来源。
+- `features/home/restoration/homeRestorationService.js`：统一恢复区块、卡片和最终滚动位置。
+- `app/navigation/sitePaths.js`：站内路径、站点 base 和浏览器最终地址的唯一转换入口。
+- `components/chrome/brandGeometry.js`：品牌 LOGO、锚点和字标的纯几何计算。
+- `app/runtime/bootParams.js`：冻结首次加载的 `intro`、`motion` 和 `view` 参数。
 
-`Layout` 不再直接组合品牌、字标、背景、导航 DOM 或 WebGL 画布。新增页面内容功能时，不应把持久视觉逻辑重新放回组合根。
+`Layout` 不直接组合品牌、字标、背景、导航 DOM、WebGL 画布或导航事务。新增页面内容功能时，不应把持久视觉逻辑重新放回组合根。
 
 ### 持久视觉层
 
-`src/components/navigation/PersistentSiteChrome.vue` 常驻 Layout，一次挂载后跨路由保持同一批 DOM：
+`src/components/chrome/PersistentSiteChrome.vue` 常驻 Layout，一次挂载后跨路由保持同一批 DOM：
 
 - `SpaceBackdrop.vue`：固定星空背景。
 - `SiteBrandButton.vue`：唯一品牌入口、手机品牌玻璃和静态 LOGO。
@@ -116,7 +130,7 @@ npm run test:e2e
 - `useSiteNavigation.js` 只生成一套 DOM 与 Three.js 共用的归一化导航坐标。
 - `usePersistentCosmicScenes.js` 管理两块画布的场景生命周期、首帧 readiness、预绘制和销毁。
 - `logoScene.js` 只拥有首页主星场景，不创建 RAF，也不持有导航星。
-- `persistentNavigationScene.js` 只拥有常驻导航星场景、尺寸和单帧绘制。
+- `navigationScene.js` 只拥有常驻导航星场景、尺寸和单帧绘制。
 - `cosmicLoop.js` 是唯一持续 Three.js 调度器，同一帧依次驱动开场引擎、主星和导航星。
 - `cosmicRuntime.js`、`navigationStars.js` 和 `logoBloom.js` 继续提供共享渲染能力。
 
@@ -130,7 +144,7 @@ SwiftShader、llvmpipe 等软件 WebGL 环境使用较低像素比并跳过昂�
 
 ### 首页
 
-首页 section 组件位于 `src/components/home/`，文案来源是：
+首页 section 组件位于 `src/features/home/components/`，文案来源是：
 
 - `docs/home/about.md`
 - `docs/home/games.md`
@@ -149,10 +163,12 @@ SwiftShader、llvmpipe 等软件 WebGL 环境使用较低像素比并跳过昂�
 
 卡片进入详情页、“游戏目录”返回和浏览器后退使用 View Transitions：
 
-- `GameCarouselCard.vue` 负责源卡片和点击拦截。
+- `GameCarouselCard.vue` 负责源卡片、返回快照和点击拦截。
 - `GameArticleHero.vue` 提供详情页目标元素。
-- `gameCarouselState.js` 记录当前卡片并等待轮播恢复。
-- `useViewTransitionNavigation.js` 协调进入、显式返回和浏览器后退。
+- `gameCarouselState.js` 保存稳定卡片键，并在 Vue 挂载 flush 内同步恢复轮播。
+- `navigationCoordinator.js` 协调普通卡片进入、显式返回和浏览器后退。
+- `transitionOrchestrator.js` 统一 520ms 原生共享元素节奏、140ms CSS 降级和 3 秒超时。
+- `historyTransitionBridge.js` 只在详情后退回首页时对当前同一 URL 提交一次。
 
 不支持 View Transitions 的浏览器会使用淡出淡入。减少动态效果模式下直接切页。
 
@@ -273,20 +289,21 @@ Markdown 图片支持以下布局类：
 
 ### 游戏卡片恢复
 
-当前游戏卡片 URL 保存在 `sessionStorage`，用于从详情页或浏览器后退时恢复卡片位置。若调试时状态异常，可清除：
+当前游戏返回快照保存在 `sessionStorage`，包含版本、首页 hash、稳定卡片键和可选滚动位置。缺失、损坏、旧版本或卡片失效时回到游戏目录默认位置。若调试时状态异常，可清除：
 
 ```text
-yuanxing:active-game
+yuanxing:home-return
 yuanxing:intro-seen
 ```
 
 ### 动画与滚动
 
 - 页面章节使用可取消的自定义对齐，不使用原生 Scroll Snap。
-- 浏览器滚动恢复设为手动模式；显式导航在 View Transition 捕获新快照前完成锚点定位。
+- 浏览器滚动恢复设为手动模式；返回更新回调只执行路由提交、Vue DOM flush 和同步恢复。
 - 导航、区块滚动和自动吸附使用同一套 `scrollOffset + padding-top` 落点。
 - 页面离场只淡出内容层，持久导航视觉和背景不卸载。
-- 导航路由返回前预绘制首页主星，再启动 View Transition；回调内同步恢复锚点。
+- 导航路由返回前预绘制首页主星，再启动 View Transition。
+- 浏览器后退桥接前后校验 URL 和 `history.length`；同一遍历最多桥接一次。
 - 游戏卡片的共享元素动画依赖 DOM 元素名称和轮播同步定位。
 - 修改轮播尺寸、封面比例或详情页头部时，必须复查进入和返回动画。
 
@@ -327,7 +344,7 @@ npm run build
 - `prefers-reduced-motion` 和无 WebGL 降级。
 - 浏览器控制台无错误。
 
-浏览器交互回归使用 Playwright，覆盖首页渲染、开场解锁、区块导航、游戏卡片返回、连续后退、手机轮播、资源清理、持久 DOM 身份、单渲染循环、品牌交接和 WebGL 降级。当前仍没有独立 lint 或格式化脚本；`npm run build` 和 `npm run test:e2e` 是主要质量检查。
+自动化质量检查包括 `npm run test:unit`、`npm run test:e2e` 和 `npm run build`。Playwright 覆盖首页渲染、开场解锁、区块导航、游戏卡片返回、严格历史桥接、缺失/损坏快照、连续后退、390px 手机、资源清理、持久 DOM 身份、单渲染循环、品牌交接、CSS 降级和 WebGL 降级。视觉用例以不超过 `0.1%` 像素差异比较桌面与手机关键状态。当前仍没有独立 lint 或格式化脚本。
 
 ## 构建与部署
 

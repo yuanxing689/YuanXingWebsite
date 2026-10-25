@@ -145,18 +145,27 @@ test('首页主星在导航玻璃出现前完成静态 LOGO 交接', async ({ pa
       behavior: 'auto'
     })
   })
-  await page.waitForTimeout(260)
 
-  const beforeGlass = await page.evaluate(() => ({
-    markOpacity: Number.parseFloat(
-      getComputedStyle(document.querySelector('.brand-home__mark')).opacity
-    ),
-    glassOpacity: Number.parseFloat(
-      getComputedStyle(document.querySelector('.star-navigation-glass')).opacity
-    ),
+  const readLogoHandoff = () => page.evaluate(() => ({
+    markOpacity: Number.parseFloat(getComputedStyle(
+      document.querySelector('.brand-home__mark')
+    ).opacity),
+    glassOpacity: Number.parseFloat(getComputedStyle(
+      document.querySelector('.star-navigation-glass')
+    ).opacity),
     mainLogoOpacity:
       window.__yuanxingCosmicDebug?.getSnapshot?.().mainLogoOpacity
   }))
+
+  await expect.poll(async () => {
+    const state = await readLogoHandoff()
+    return (
+      state.markOpacity >= 0.98 &&
+      state.mainLogoOpacity <= 0.02 &&
+      state.glassOpacity <= 0.02
+    )
+  }).toBe(true)
+  const beforeGlass = await readLogoHandoff()
 
   expect(beforeGlass.markOpacity).toBeGreaterThanOrEqual(0.98)
   expect(beforeGlass.mainLogoOpacity).toBeLessThanOrEqual(0.02)
@@ -169,13 +178,12 @@ test('首页主星在导航玻璃出现前完成静态 LOGO 交接', async ({ pa
       behavior: 'auto'
     })
   })
-  await page.waitForTimeout(300)
 
   await expect(
     page.locator('.star-navigation-glass')
   ).toHaveClass(/star-navigation-glass--visible/)
-  expect(
-    await page.locator('.brand-home__mark').evaluate(
+  await expect.poll(
+    () => page.locator('.brand-home__mark').evaluate(
       (element) => Number.parseFloat(getComputedStyle(element).opacity)
     )
   ).toBeGreaterThanOrEqual(0.98)
