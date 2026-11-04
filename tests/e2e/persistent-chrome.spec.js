@@ -63,6 +63,15 @@ async function readCosmicSnapshot(page) {
   )
 }
 
+async function waitForNavigationFrameAdvance(page, previous) {
+  await expect.poll(async () => {
+    const snapshot = await readCosmicSnapshot(page)
+    return snapshot?.navigationFrameCount ?? -1
+  }).toBeGreaterThan(previous.navigationFrameCount)
+
+  return readCosmicSnapshot(page)
+}
+
 test('持久视觉层跨首页、详情与返回保持相同 DOM 身份', async ({ page }) => {
   await openHome(page)
   await captureChromeIdentity(page)
@@ -102,8 +111,7 @@ test('全站只有一个持续 Three.js 循环，导航相位跨路由不回零'
   expect(first.startCount).toBe(1)
   expect(first.isRunning).toBe(true)
 
-  await page.waitForTimeout(260)
-  const movingHome = await readCosmicSnapshot(page)
+  const movingHome = await waitForNavigationFrameAdvance(page, first)
   expect(movingHome.elapsed).toBeGreaterThan(first.elapsed)
   expect(movingHome.navigationFrameCount).toBeGreaterThan(
     first.navigationFrameCount
@@ -112,10 +120,8 @@ test('全站只有一个持续 Three.js 循环，导航相位跨路由不回零'
 
   await navigateHomeSection(page, 'games')
   await enterFirstGame(page)
-  await page.waitForTimeout(120)
   const detailStart = await readCosmicSnapshot(page)
-  await page.waitForTimeout(260)
-  const detailLater = await readCosmicSnapshot(page)
+  const detailLater = await waitForNavigationFrameAdvance(page, detailStart)
 
   expect(detailLater.startCount).toBe(1)
   expect(detailLater.isRunning).toBe(true)
@@ -127,7 +133,7 @@ test('全站只有一个持续 Three.js 循环，导航相位跨路由不回零'
 
   await page.locator(`${NAVIGATION} a[data-section-link="games"]`).click({ force: true })
   await waitForHomeReady(page)
-  const returnedHome = await readCosmicSnapshot(page)
+  const returnedHome = await waitForNavigationFrameAdvance(page, detailLater)
 
   expect(returnedHome.startCount).toBe(1)
   expect(returnedHome.elapsed).toBeGreaterThan(detailLater.elapsed)
