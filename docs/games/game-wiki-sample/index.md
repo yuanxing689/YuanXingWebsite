@@ -13,28 +13,34 @@ draft: true
 
 ## 双图对照
 
-同一个段落中的左右图片会自动排成两列。
+使用双列图片组展示同一类内容。
 
-![未行之途](./images/未行之途.webp){.image-left}
-![YXLB 素材](./images/YXLB.webp){.image-right}
+::: media-grid 2
+![未行之途封面](./images/未行之途.webp)
+![YXLB 素材](./images/YXLB.webp)
+:::
 
-两列图片下方继续使用普通正文，不需要额外清除左右浮动。
+两列图片下方继续使用普通正文。
 
 ## 居中图片
 
-单张图片可以使用居中样式，最大宽度为 `720px`。
+单张图片可以使用居中布局，最大宽度为 `720px`。
 
-![居中素材](./images/YXLB.webp){.image-center}
+::: media-block center
+![居中素材](./images/YXLB.webp)
+:::
 
 ## 全宽图片
 
-需要强调横向截图时，可以让图片占满正文宽度。
+需要强调横向截图时，可以使用全宽布局。
 
-![全宽封面](./images/未行之途.webp){.image-full}
+::: media-block full
+![全宽封面](./images/未行之途.webp)
+:::
 
 ## 内容结构
 
 - 一级内容使用 `##`。
 - 子内容使用 `###`。
-- 图片后可以追加布局类，例如 `{.image-left .image-wrap}`。
+- 图片组合使用 `media-block`、`media-stack` 或 `media-grid` 容器。
 - 不要在正文重复游戏名和汉化状态。

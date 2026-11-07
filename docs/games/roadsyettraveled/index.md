@@ -12,31 +12,30 @@ draft: false
 > 不惧远高，不惧坠落，惟恐攀登之不足，见地平之辽阔——【伊科里奥德】一号（未寻回）
 
 ## 项目简介
-<div style="float: right; width: 35%; margin-left: 15px;">
-  <img src="./images/郎恩主页.webp" style="width: 100%; margin-bottom: 10px;" />
-  <img src="./images/马洛温主页.webp" style="width: 100%; margin-bottom: 10px;" />
-  <img src="./images/马鲁克主页.webp" style="width: 100%; margin-bottom: 10px;" />
-</div>
 
-你是否认为自己能改变这个世界？无论你为何人，所能及者终有边界，<br>
+::: media-stack right
+![郎恩主页](./images/郎恩主页.webp)
+![马鲁克主页](./images/马鲁克主页.webp)
+![马洛温主页](./images/马洛温主页.webp)
+:::
 
-所拥有的不过瞬息光阴，欲撼动天地，其力何其微渺。<br>
+你是否认为自己能改变这个世界？无论你为何人，所能及者终有边界，
 
-一如往昔，你又一次踏上了开学第一天的路途。<br>
+所拥有的不过瞬息光阴，欲撼动天地，其力何其微渺。
 
-这并非易事——初临新境的忐忑萦绕心头，但你终究从容应对。<br>
+一如往昔，你又一次踏上了开学第一天的路途。
 
-这便是你如今的生活，一场在迁徙与崭新开端间循环的旅途。<br>
+这并非易事——初临新境的忐忑萦绕心头，但你终究从容应对。
 
-万物恒常流转，无一停驻。而今日，亦无不同。转瞬之间，<br>
+这便是你如今的生活，一场在迁徙与崭新开端间循环的旅途。
 
-一切荡然无存。归途渺茫，你该如何自处？<br>
+万物恒常流转，无一停驻。而今日，亦无不同。转瞬之间，
 
-新结识的同伴能否护你周全？抑或这一切终将难以承受？<br>
+一切荡然无存。归途渺茫，你该如何自处？
+
+新结识的同伴能否护你周全？抑或这一切终将难以承受？
 
 但请继续前行吧，毕竟，你已再无旁失。
-
-<div style="clear: both;"></div>
 
 ## 11版本修改：  
 - 默认主角名称可热切换  
@@ -56,9 +55,11 @@ draft: false
 
 ## 主要角色
 
-## <span style="color: #F1E25D;">郎恩</span>
+### <span style="color: #F1E25D;">郎恩</span>
 
-![郎恩](./images/郎恩.webp){.image-right .image-wrap}
+::: media-stack right
+![郎恩](./images/郎恩.webp)
+:::
 
 "郎恩似乎是个显而易见的选择"  
 "他善良、体贴，而且似乎对我真的充满好奇。"  
@@ -83,9 +84,11 @@ draft: false
 与提尔，船长为上下级关系  
 
 
-## <span style="color: #43BFC7;">马洛温</span>
+### <span style="color: #43BFC7;">马洛温</span>
 
-![马洛温](./images/马洛温.webp){.image-right .image-wrap}
+::: media-stack right
+![马洛温](./images/马洛温.webp)
+:::
 
 "马洛温似乎是唯一明智的选择。"  
 "自从我来到这儿，他自始至终都表现得无可挑剔，  
@@ -110,9 +113,12 @@ draft: false
 与船长为普通上下级关系  
 
 
-## <span style="color: #C32148;">马鲁克</span>
+### <span style="color: #C32148;">马鲁克</span>
 
-![马鲁克](./images/马鲁克.webp){.image-right .image-wrap}
+::: media-stack right
+![马鲁克](./images/马鲁克.webp)
+:::
+
 "马鲁克是个……有趣的选择。"  
 "他完全是个混蛋。这一点毫无疑问。"  
 "但只要我不老烦他，他又能睡自己床上，我觉得他会冷静下来的。"  
@@ -140,5 +146,6 @@ draft: false
 
 
 最后更新时间：2026/10/15  
+{.media-stop}
 
 （内容源于游戏内，并非作者原设定，并会不定期删改。）

@@ -1,9 +1,11 @@
 import { defineConfig } from 'vitepress'
+import { registerMediaContainers } from './markdown/mediaContainers.js'
 import { createSiteImagePlugin } from './markdown/siteImages.js'
 import { SITE_SCROLL_OFFSET } from '../../src/app/navigation/siteScroll.js'
 
 const siteBase = process.env.SITE_BASE || '/'
 const normalizedBase = siteBase.endsWith('/') ? siteBase : `${siteBase}/`
+const configureSiteImages = createSiteImagePlugin(normalizedBase)
 const siteOrigin = (
   process.env.SITE_ORIGIN || 'https://ourselves.cv'
 ).replace(/\/+$/, '')
@@ -22,7 +24,10 @@ export default defineConfig({
   outDir: '../dist',
   scrollOffset: SITE_SCROLL_OFFSET,
   markdown: {
-    config: createSiteImagePlugin(normalizedBase)
+    config(md) {
+      configureSiteImages(md)
+      registerMediaContainers(md)
+    }
   },
   sitemap: {
     hostname: sitemapHostname
