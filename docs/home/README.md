@@ -115,95 +115,61 @@ Markdown 使用站点绝对路径：
 - 为图片写清楚的 `alt`。
 - 显示尺寸不超过实际需要的两倍。
 
-## 图片排版类
+## 图片布局容器
 
-首页正文支持以下图片样式：
+首页图片不再给单张图片追加布局类，而是用容器声明整个图片组的布局。
+容器内只放图片；直接图片和链接图片使用同一套规则。
+
+### 单图
 
 ```md
-![左对齐图片](/images/home/example.webp){.image-left}
-
-![右对齐图片](/images/home/example.webp){.image-right}
-
-![居中图片](/images/home/example.webp){.image-center}
-
-![全宽图片](/images/home/example.webp){.image-full}
-
-![左侧环绕图片](/images/home/example.webp){.image-left .image-wrap}
-
-![右侧环绕图片](/images/home/example.webp){.image-right .image-wrap}
+::: media-block center
+![汉化组成员](/images/home/team.webp)
+:::
 ```
 
-规则：
+`media-block` 支持 `left`、`right`、`center`、`full`。
 
-- `.image-left`：单独左对齐，最大宽度为正文宽度的 50%。
-- `.image-right`：单独右对齐，最大宽度为正文宽度的 50%。
-- `.image-center`：居中，最大宽度为 `720px`。
-- `.image-full`：占满正文宽度。
-- `.image-left .image-wrap`：桌面端左浮动，宽度为 `min(42%, 360px)`，正文环绕。
-- `.image-right .image-wrap`：桌面端右浮动，正文环绕。
-- 图片默认圆角为 `6px`。
-
-### 停止环绕
-
-在第一个不再环绕的段落添加 `.image-wrap-stop`：
+### 单图或多图环绕
 
 ```md
-![左侧环绕图片](/images/home/example.webp){.image-left .image-wrap}
+::: media-stack left
+![现场照片](/images/home/activity-01.webp)
+![现场照片](/images/home/activity-02.webp)
+:::
 
-这段文字在图片右侧环绕。
-
-从这段开始回到正常排版。
-{.image-wrap-stop}
+这段文字会环绕在图片组右侧。
 ```
 
-该段落及其后续内容会清除浮动。
+`media-stack` 支持 `left`、`right`。桌面端浮动整个图片组，手机端取消浮动。
 
-### 两图并排
-
-放在同一个段落中：
+需要提前结束环绕时，在第一个恢复正常宽度的段落末尾添加：
 
 ```md
-![左图](/images/home/left.webp){.image-left}
-![右图](/images/home/right.webp){.image-right}
+从这一段开始恢复正文全宽
+{.media-stop}
 ```
 
-两张图会自动排成两列。用空行拆成两个段落后，会各自独占一行。
-
-### 带链接的图片
-
-VitePress 会把 `{.image-left}` 等属性应用到外层链接，而不是内部 `<img>`。当前主题同时支持直接图片和链接图片：
+### 两图与三图
 
 ```md
-[![itch.io](/images/home/itch-io.webp)](https://example.com){.image-left}
-[![X](/images/home/x.webp)](https://example.com){.image-right}
+::: media-grid 2
+![活动一](/images/home/activity-01.webp)
+![活动二](/images/home/activity-02.webp)
+:::
 ```
 
-说明文字与图片组之间要留空行；两张图片之间不要留空行，否则双列会变成两行。
-
-### 三图并排
-
-三张图片使用专用网格，不要复用 `image-left`、`image-right` 或 `image-full`：
-
 ```md
+::: media-grid 3
 [![itch.io](/images/home/itch-io.webp)](https://example.com)
 [![X](/images/home/x.webp)](https://example.com)
 [![Telegram](/images/home/telegram.webp)](https://example.com)
-{.image-grid-3}
+:::
 ```
 
-- 桌面端固定三列。
-- 单图最大 `180×120px`，保持比例并垂直居中。
-- 小于 `680px` 时仍保持三列，并缩小间距与图片高度。
-- 链接图片的 `alt` 应写对应平台名称。
-
-### 手机端
-
-小于 `680px` 时：
-
-- `.image-left` 和 `.image-right` 变为全宽。
-- `.image-wrap` 自动取消浮动并变为全宽。
-- 左右两图从双列变成上下排列。
-- 三图网格保持横向三列，不会变成纵向长列表。
+- `media-grid 2` 在桌面端两列，手机端单列。
+- `media-grid 3` 在桌面和手机都保持三列，适合平台图标。
+- 三列图片最大 `180×120px`，并保持比例。
 
 ## 修改后检查
 

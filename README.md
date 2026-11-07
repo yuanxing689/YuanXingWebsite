@@ -7,6 +7,7 @@
 ## 技术栈
 
 - VitePress 1.6：静态站点、Markdown 路由和内容加载。
+- markdown-it-container 4：正文图片组的 Markdown 容器。
 - Vue 3.5：组件、状态和页面布局。
 - Three.js 0.172：主星、环带、导航星和 Bloom 后处理。
 - Anime.js 4.5：首页开场时间轴。
@@ -42,7 +43,11 @@ npx playwright install chromium
 npm run test:unit
 npm run test:e2e:baseline
 npm run test:e2e
+npm run test:e2e:visual
 ```
+
+`npm run test:e2e` 是 CI 使用的行为测试入口；`npm run test:e2e:visual`
+只用于本地人工截图比对，不作为当前 CI 门禁。
 
 硬件 Edge 使用系统已安装浏览器：
 
@@ -68,6 +73,7 @@ npm run test:e2e
 │  └─ .vitepress/
 │     ├─ config.mjs                # VitePress 配置
 │     ├─ data/                     # 首页和游戏数据加载器
+│     ├─ markdown/                 # 图片路径与媒体容器插件
 │     └─ theme/                    # Layout、主题样式和主题入口
 ├─ src/
 │  ├─ app/
@@ -86,7 +92,7 @@ npm run test:e2e
 └─ playwright.config.js            # Playwright 测试服务器与浏览器配置
 ```
 
-构建缓存和 `.screenshots/` 调试输出不应提交。`tests/e2e/visual.spec.js-snapshots/` 是有意维护的重构前后视觉基准，只能由基线提交生成，不能为通过测试而更新。
+构建缓存和 `.screenshots/` 调试输出不应提交。`tests/e2e/visual.spec.js-snapshots/` 保留为人工视觉检查基准，当前不作为 CI 必过检查。
 
 ## 页面架构
 
@@ -248,15 +254,35 @@ draft: false
 - 当前正式游戏图片使用 WebP；现有中文文件名继续保留，新增文件可优先使用稳定的 ASCII slug。
 - `docs/games/` 下的三份游戏 Markdown 同时作为维护示例：分别演示图文环绕、全宽图片和双图排版。
 
-Markdown 图片支持以下布局类：
+正文图片组使用 Markdown 容器声明布局，不再给单张图片追加
+`image-left`、`image-right` 或 `image-wrap` 等类：
 
 ```md
-![左图](./images/example.webp){.image-left .image-wrap}
-![居中](./images/example.webp){.image-center}
-![全宽](./images/example.webp){.image-full}
+::: media-block center
+![居中图片](./images/example.webp)
+:::
+
+::: media-stack right
+![角色一](./images/character-01.webp)
+![角色二](./images/character-02.webp)
+![角色三](./images/character-03.webp)
+:::
+
+::: media-grid 3
+![平台一](./images/platform-01.webp)
+![平台二](./images/platform-02.webp)
+![平台三](./images/platform-03.webp)
+:::
 ```
 
-详细规则见 `docs/home/README.md`。
+- `media-block`：单图块，支持 `left`、`right`、`center`、`full`。
+- `media-stack`：单图或多图纵向列，支持 `left`、`right`，桌面端图文环绕。
+- `media-grid`：多图横排，支持 `2`、`3` 列。
+- 图片容器内只放图片，不混入正文段落。
+- 直接图片和链接图片使用同一套布局规则。
+
+详细规则见 [首页内容说明](./docs/home/README.md) 和
+[游戏内容说明](./docs/games/README.md)。
 
 ### 品牌和导航资源
 
@@ -341,10 +367,12 @@ npm run build
 - 品牌按钮只触发一次整体视觉淡出淡入。
 - 导航返回后不再出现自动吸附造成的二次位移。
 - 首页封面使用 public 绝对路径，游戏正文图片使用各自目录内的相对路径。
+- 图片组在桌面端和手机端的列数、浮动与间距符合容器配置。
+- 正文在桌面和手机上保持 17px、清晰颜色和舒适行高，`h2`/`h3` 层级不过度断层。
 - `prefers-reduced-motion` 和无 WebGL 降级。
 - 浏览器控制台无错误。
 
-自动化质量检查包括 `npm run test:unit`、`npm run test:e2e` 和 `npm run build`。Playwright 覆盖首页渲染、开场解锁、区块导航、游戏卡片返回、严格历史桥接、缺失/损坏快照、连续后退、390px 手机、资源清理、持久 DOM 身份、单渲染循环、品牌交接、CSS 降级和 WebGL 降级。视觉用例以不超过 `0.1%` 像素差异比较桌面与手机关键状态。当前仍没有独立 lint 或格式化脚本。
+自动化质量检查包括 `npm run test:unit`、`npm run test:e2e` 和 `npm run build`。Playwright 覆盖首页渲染、开场解锁、区块导航、游戏卡片返回、严格历史桥接、缺失/损坏快照、连续后退、390px 手机、图片容器布局、正文与标题字号颜色、资源清理、持久 DOM 身份、单渲染循环、品牌交接、CSS 降级和 WebGL 降级。视觉截图文件可用于本地人工比对，但不属于当前 CI 必过检查。当前仍没有独立 lint 或格式化脚本。
 
 ## 构建与部署
 

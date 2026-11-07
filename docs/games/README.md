@@ -18,7 +18,7 @@ docs/games/
 | 页面 | 演示重点 |
 | --- | --- |
 | `roadsyettraveled` | 项目简介、右侧图文环绕和停止环绕。 |
-| `roadsyettraveled2` | 全宽正文图片、列表和进度结构。 |
+| `UNDERHEAVEN` | 天堂下页面，演示全宽正文图片、列表和进度结构。 |
 | `game-wiki-sample` | 双图并排、居中图片和全宽图片。 |
 
 其他带“副本”字样的目录仅保留为本地测试页，已设置 `draft: true`，不会出现在首页游戏目录。
@@ -157,141 +157,105 @@ Markdown 使用相对路径：
 
 不建议把正文截图全部放进 `docs/public/`；只有需要多个页面共享的图片才放到 public。
 
-## 图片排版类
+## 正文图片容器
 
-VitePress 支持在 Markdown 图片后追加 CSS 类。当前主题提供以下布局。
+图片组布局由 Markdown 容器决定，不再给单张图片追加
+`image-left`、`image-right`、`image-wrap` 等布局类。
 
-### 默认图片
+容器内只放图片，不要混入普通段落。直接图片和链接图片使用相同写法，
+段落之间是否留空行不会改变布局。
+
+Markdown 会为容器内的图片生成 `<p>`。主题对这个图片专用段落使用
+`display: contents`，让图片直接参与外层 Grid；因此正文、图片说明或 caption
+不应放进这三个图片容器。
+
+### 单图块
+
+单图块不环绕文字，可选方向为 `left`、`right`、`center`、`full`：
 
 ```md
+::: media-block center
 ![游戏截图](./images/screenshot-01.webp)
+:::
 ```
-
-默认显示为块级图片，最大宽度不超过正文，宽度不足时保持原尺寸。
-
-### 左对齐
 
 ```md
-![游戏截图](./images/screenshot-01.webp){.image-left}
+::: media-block full
+![宽幅场景](./images/screenshot-02.webp)
+:::
 ```
 
-- 单独左对齐。
-- 最大宽度为正文的 `50%`。
-- 不环绕正文。
+- `left`、`right` 最大宽度为正文的 `50%`。
+- `center` 最大宽度为 `720px`。
+- `full` 占满正文宽度。
+- 图片默认带 `6px` 圆角。
 
-### 右对齐
+### 单图或多图纵列环绕
+
+`media-stack` 把一整组图片当成一个纵向列。桌面端的 `left`、`right`
+表示整个列的浮动方向：
 
 ```md
-![游戏截图](./images/screenshot-01.webp){.image-right}
+::: media-stack right
+![角色一](./images/character-01.webp)
+![角色二](./images/character-02.webp)
+![角色三](./images/character-03.webp)
+:::
+
+这段正文会环绕在图片列左侧。三张图片在列内按照顺序纵向排列。
 ```
 
-- 单独右对齐。
-- 最大宽度为正文的 `50%`。
-- 不环绕正文。
-
-### 居中
-
-```md
-![游戏截图](./images/screenshot-01.webp){.image-center}
-```
-
-- 单图居中。
-- 最大宽度为 `720px`。
-
-### 全宽
-
-```md
-![游戏截图](./images/screenshot-01.webp){.image-full}
-```
-
-- 占满正文宽度。
-- 适合宽幅截图和场景展示。
-
-### 左侧环绕
-
-```md
-![游戏截图](./images/screenshot-01.webp){.image-left .image-wrap}
-
-这段文字会环绕在图片右侧。
-```
-
-- 桌面端左浮动。
-- 图片宽度为 `min(42%, 360px)`。
-- 默认右间距 `1.5rem`，下间距 `1rem`。
-
-### 右侧环绕
-
-```md
-![游戏截图](./images/screenshot-01.webp){.image-right .image-wrap}
-
-这段文字会环绕在图片左侧。
-```
-
-- 桌面端右浮动。
-- 图片宽度为 `min(42%, 360px)`。
+图片列宽度为 `min(42%, 360px)`。组内间距由主题统一控制，不需要给每张
+图片设置 margin。
 
 ### 停止环绕
 
-在第一个不再环绕的段落末尾添加 `{.image-wrap-stop}`：
+后续标题会自动清除浮动。如果正文中间需要提前停止环绕，在第一个不再环绕
+的段落末尾添加 `{.media-stop}`：
 
 ```md
-![左侧截图](./images/screenshot-01.webp){.image-left .image-wrap}
+这一段仍在图片旁边。
 
-这一段仍然环绕。
-
-从这一段开始停止环绕
-{.image-wrap-stop}
-
-后续正文在图片下方正常排版。
+从这一段开始恢复正文全宽
+{.media-stop}
 ```
 
-`image-wrap-stop` 会清除图片浮动。
-
-### 两张图并排
-
-同一个 Markdown 段落中放入左右两张图：
+### 两图并排
 
 ```md
-![左图](./images/left.webp){.image-left}
-![右图](./images/right.webp){.image-right}
+::: media-grid 2
+![左图](./images/left.webp)
+![右图](./images/right.webp)
+:::
 ```
 
-两张图会排成两列。中间用空行分开后，会变成上下两张独立图片。
-
-### 带链接的图片
-
-图片外层有链接时，布局类会应用到 `<a>`：
-
-```md
-[![商店截图](./images/store.webp)](https://example.com){.image-left}
-[![官网截图](./images/site.webp)](https://example.com){.image-right}
-```
-
-主题会约束链接宽度并让内部图片自适应。说明文字与图片组之间留一个空行，两张图片之间不要留空行。
+- 桌面端固定两列。
+- 小于 `680px` 时改为纵向单列。
+- 直接图片和链接图片都受同一套 Grid 规则控制。
 
 ### 三图并排
 
-需要三列图片时使用专用网格：
-
 ```md
+::: media-grid 3
 [![平台一](./images/platform-1.webp)](https://example.com)
 [![平台二](./images/platform-2.webp)](https://example.com)
 [![平台三](./images/platform-3.webp)](https://example.com)
-{.image-grid-3}
+:::
 ```
 
-桌面端与手机端都保持三列，单图最大 `180×120px`，手机端缩小间距与图片高度。不要用 `image-left` 和 `image-right` 拼出第三列。
+- 桌面端与手机端都保持三列。
+- 单图最大 `180×120px`，保持比例并垂直居中。
+- 手机端缩小间距与图片高度。
+- 链接图片的 `alt` 应写对应平台名称。
 
 ### 手机端行为
 
 屏幕宽度小于 `680px` 时：
 
-- 左对齐和右对齐图片自动变为全宽。
-- 环绕图片取消浮动，变为全宽上下排版。
-- 两张并排图片自动改成上下排列。
-- 三图网格保持横向三列。
-
-图片默认带 `6px` 圆角。
+- `media-block left/right` 自动取消半栏宽度。
+- `media-stack left/right` 取消浮动，按全宽纵向排列。
+- `media-grid 2` 自动改为单列。
+- `media-grid 3` 保持三列，适合平台图标或小型缩略图。
 
 ## 新增游戏流程
 
