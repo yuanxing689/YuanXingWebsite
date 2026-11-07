@@ -18,7 +18,7 @@ docs/games/
 | 页面 | 演示重点 |
 | --- | --- |
 | `roadsyettraveled` | 项目简介、右侧图文环绕和停止环绕。 |
-| `roadsyettraveled2` | 全宽正文图片、列表和进度结构。 |
+| `UNDERHEAVEN` | 天堂下页面，演示全宽正文图片、列表和进度结构。 |
 | `game-wiki-sample` | 双图并排、居中图片和全宽图片。 |
 
 其他带“副本”字样的目录仅保留为本地测试页，已设置 `draft: true`，不会出现在首页游戏目录。

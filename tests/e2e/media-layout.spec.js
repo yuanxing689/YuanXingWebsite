@@ -114,3 +114,21 @@ test('纵列图片组共用右侧浮动，三图画廊保持单行三列', async
     )
   ).toBe(true)
 })
+
+test('远端新增的 UNDERHEAVEN 页面使用全宽媒体容器', async ({ page }) => {
+  await page.goto('/games/UNDERHEAVEN/?motion=off')
+  await waitForGameDetail(page)
+
+  const fullBlock = page.locator('.media-block--full')
+  const fullImage = fullBlock.locator('img')
+  await expect(fullBlock).toHaveCount(1)
+  await expect(fullImage).toBeVisible()
+
+  const widthRatio = await page.evaluate(() => {
+    const body = document.querySelector('.game-article-body')
+    const image = document.querySelector('.media-block--full img')
+    return image.getBoundingClientRect().width /
+      body.getBoundingClientRect().width
+  })
+  expect(widthRatio).toBeGreaterThan(0.95)
+})
