@@ -6,7 +6,7 @@ description: 展示游戏字段、正文层级和图片排版的标准样例。
 status: planned
 order: 30
 cover: /images/games/YXLB.webp
-draft: false
+draft: true
 ---
 
 > 这是一个专门用于展示 Markdown 排版的样例页面，可以复制其结构后再替换正式内容。
@@ -15,7 +15,7 @@ draft: false
 
 同一个段落中的左右图片会自动排成两列。
 
-![未行之途封面](./images/未行之途.webp){.image-left}
+![未行之途](./images/未行之途.webp){.image-left}
 ![YXLB 素材](./images/YXLB.webp){.image-right}
 
 两列图片下方继续使用普通正文，不需要额外清除左右浮动。
