@@ -25,18 +25,22 @@
 - Three.js 只有一个持续循环，导航相位跨路由不回零。
 - 主星 LOGO 与导航玻璃的静态交接。
 - WebGL 正常与真实失败降级。
+- `media-block` 单图、`media-stack` 纵列、`media-grid` 双列与三列布局。
+- 正文 17px、增强后的正文颜色，以及 `h2`/`h3` 的可读层级比例。
 - 390px 手机、减少动态效果和不支持 View Transitions 的路径。
 - 资源监听器、rAF 和定时器不跨路由累积。
 - 常规路由流程无未捕获异常或 `console.error`。
 
-### 视觉基准
+### 人工视觉基准
 
 `tests/e2e/visual.spec.js` 在 `?intro=off&motion=off` 且减少动态效果模式下采集：
 
 - 桌面首页首页面、About、Games、Links、详情、品牌返回和 WebGL 降级。
 - 手机首页首页面、About、Games、Links、详情和品牌返回。
 
-Chromium 和 Edge 各维护独立快照。像素差异上限固定为 `0.1%`，不得通过更新基准图掩盖视觉回归。业务视觉改动若确实需要新基准，应单独提交并说明前后差异。
+Chromium 和 Edge 各维护独立快照。像素差异上限固定为 `0.1%`，不得通过
+更新基准图掩盖视觉回归。该套件保留用于本地人工比对，当前不纳入 CI 必过
+检查；布局行为由 `media-layout.spec.js` 的尺寸和位置断言覆盖。
 
 ## 本地运行
 
@@ -44,7 +48,11 @@ Chromium 和 Edge 各维护独立快照。像素差异上限固定为 `0.1%`，�
 npm ci
 npm run test:unit
 npm run build
+npm run test:e2e
 ```
+
+`npm run test:e2e` 只执行 CI 使用的浏览器行为套件；需要人工比对截图时，
+另行运行 `npm run test:e2e:visual`。
 
 软件 Chromium 使用自定义浏览器缓存目录：
 
@@ -81,9 +89,11 @@ Playwright 会自动在 `127.0.0.1:4173` 启动 VitePress 开发服务器，并�
 - 不直接修改 `tests/e2e/visual.spec.js-snapshots/`。确需重建基准时，应确认需求明确要求视觉变化，并单独审查图片。
 - `.screenshots/` 是临时人工调试目录，不属于自动化基准。
 
-GitHub Actions 的 `Quality checks` 分两部分执行：
+GitHub Actions 的 `Quality checks` 当前只有一个 Ubuntu 作业：
 
-- Ubuntu 作业执行构建、单元测试和除截图比较外的全部浏览器行为测试，CI Chromium 强制使用 SwiftShader。
-- Windows 作业只执行视觉截图比较，以匹配当前 Windows 视觉基准；CI 不录制视频，只保留失败 trace。
+- 执行构建、单元测试和全部浏览器行为测试。
+- 包含图片容器布局、导航、历史、资源清理和 Three.js 循环检查。
+- 不执行截图比较；CI Chromium 强制使用 SwiftShader，失败时只保留 trace 与截图附件。
 
-CI 的测试与等待超时高于本地，仅用于覆盖无 GPU runner 的启动波动，不改变业务断言或截图阈值。
+CI 的测试与等待超时高于本地，仅用于覆盖无 GPU runner 的启动波动，不改变
+业务断言或截图阈值。

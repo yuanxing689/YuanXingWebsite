@@ -4,6 +4,7 @@
   --site-line: rgba(157, 185, 255, 0.2);
   --site-blue: #9bc9ff;
   --site-muted: #a8b4d5;
+  --site-body: #c7d3e8;
 }
 
 body {
@@ -126,10 +127,22 @@ html.game-route-transitioning .game-article-body {
   font-size: clamp(1.7rem, 4vw, 3.1rem);
 }
 
+.page-content h3 {
+  margin: 2rem 0 0.75rem;
+  color: #eff4ff;
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
 .page-content p,
 .page-content li {
-  color: var(--site-muted);
-  line-height: 1.9;
+  color: var(--site-body);
+  font-size: 1.0625rem;
+  line-height: 1.85;
+  text-wrap: pretty;
 }
 
 .home-section__markdown a {
@@ -149,159 +162,151 @@ html.game-route-transitioning .game-article-body {
   color: var(--site-muted);
 }
 
-/* 图片排版由作者通过 Markdown 属性选择 */
-.page-content img.image-left {
-  display: block;
-  max-width: 50%;
-  height: auto;
-  margin: 1.5rem auto 1.5rem 0;
-  border-radius: 6px;
+/* 正文图片组由 Markdown 容器统一声明，图片元素不承担组合布局。 */
+.page-content {
+  --media-radius: 6px;
+  --media-gap: clamp(0.5rem, 1.4vw, 0.875rem);
+  --media-side-width: min(42%, 360px);
+  --media-block-space: 1.5rem;
+  --media-side-space: 1.5rem;
 }
 
-.page-content img.image-right {
-  display: block;
-  max-width: 50%;
-  height: auto;
-  margin: 1.5rem 0 1.5rem auto;
-  border-radius: 6px;
+.page-content :is(.media-block, .media-stack, .media-grid) > p {
+  display: contents;
 }
 
-.page-content img.image-center {
+.page-content :is(.media-block, .media-stack, .media-grid) img {
   display: block;
-  max-width: min(100%, 720px);
-  height: auto;
-  margin: 1.5rem auto;
-  border-radius: 6px;
-}
-
-.page-content img.image-full {
-  display: block;
-  width: 100%;
-  height: auto;
-  margin: 1.5rem 0;
-  border-radius: 6px;
-}
-
-.page-content img.image-wrap {
-  float: left;
-  width: min(42%, 360px);
   max-width: 100%;
   height: auto;
-  margin: 0.5rem 1.5rem 1rem 0;
-  border-radius: 6px;
+  margin: 0;
+  border-radius: var(--media-radius);
 }
 
-.page-content img.image-wrap.image-right {
-  float: right;
-  margin: 0.5rem 0 1rem 1.5rem;
-}
-
-.page-content a.image-left,
-.page-content a.image-right,
-.page-content a.image-center,
-.page-content a.image-full,
-.page-content a.image-wrap {
+.page-content :is(.media-block, .media-stack, .media-grid) a {
   display: block;
-  height: auto;
+  min-width: 0;
   text-decoration: none;
 }
 
-.page-content a.image-left > img,
-.page-content a.image-right > img,
-.page-content a.image-center > img,
-.page-content a.image-full > img,
-.page-content a.image-wrap > img {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  height: auto;
-  margin: 0;
-  border-radius: 6px;
+.media-block {
+  margin: var(--media-block-space) 0;
 }
 
-.page-content a.image-left {
+.media-block--left,
+.media-block--right {
+  width: fit-content;
   max-width: 50%;
-  margin: 1.5rem auto 1.5rem 0;
 }
 
-.page-content a.image-right {
-  max-width: 50%;
-  margin: 1.5rem 0 1.5rem auto;
+.media-block--left {
+  margin-right: auto;
+  margin-left: 0;
 }
 
-.page-content a.image-center {
+.media-block--right {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+.media-block--center {
+  width: fit-content;
   max-width: min(100%, 720px);
-  margin: 1.5rem auto;
+  margin-inline: auto;
 }
 
-.page-content a.image-full {
+.media-block--full {
   width: 100%;
-  margin: 1.5rem 0;
 }
 
-.page-content a.image-wrap {
-  float: left;
-  width: min(42%, 360px);
-  max-width: 100%;
-  margin: 0.5rem 1.5rem 1rem 0;
+.media-block--full img {
+  width: 100%;
 }
 
-.page-content a.image-wrap.image-right {
-  float: right;
-  margin: 0.5rem 0 1rem 1.5rem;
+.media-block--right img {
+  margin-left: auto;
 }
 
-.page-content p.image-grid-3 {
+.media-block--center img {
+  margin-inline: auto;
+}
+
+.media-stack,
+.media-grid {
+  gap: var(--media-gap);
+}
+
+.media-stack {
   display: grid;
+  margin: var(--media-block-space) 0;
+}
+
+.media-stack--left,
+.media-stack--right {
+  clear: both;
+  width: var(--media-side-width);
+  margin-block: 0.5rem 1rem;
+}
+
+.media-stack--left {
+  float: left;
+  margin-right: var(--media-side-space);
+  margin-left: 0;
+}
+
+.media-stack--right {
+  float: right;
+  margin-right: 0;
+  margin-left: var(--media-side-space);
+}
+
+.media-stack img,
+.media-stack a {
+  width: 100%;
+}
+
+.media-grid {
+  display: grid;
+  align-items: start;
+  margin: var(--media-block-space) 0;
+}
+
+.media-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.media-grid--3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: center;
-  gap: clamp(1rem, 3vw, 2.5rem);
-  margin: 1.25rem 0;
 }
 
-.page-content p.image-grid-3 > a {
+.media-grid--2 img,
+.media-grid--2 a {
+  width: 100%;
+}
+
+.media-grid--3 a {
   display: grid;
-  min-width: 0;
   place-items: center;
 }
 
-.page-content p.image-grid-3 > a > img {
+.media-grid--3 img {
   width: auto;
   max-width: min(100%, 180px);
   max-height: 120px;
-  height: auto;
-  margin: 0;
-  border-radius: 6px;
+  align-self: center;
+  justify-self: center;
   object-fit: contain;
 }
 
-.page-content a.image-left:focus-visible > img,
-.page-content a.image-right:focus-visible > img,
-.page-content a.image-center:focus-visible > img,
-.page-content a.image-full:focus-visible > img,
-.page-content a.image-wrap:focus-visible > img,
-.page-content p.image-grid-3 > a:focus-visible > img {
+.page-content :is(.media-block, .media-stack, .media-grid)
+  a:focus-visible > img {
   outline: 2px solid rgba(184, 216, 255, 0.9);
   outline-offset: 4px;
 }
 
-.page-content .image-wrap-stop {
+.page-content .media-stop {
   clear: both;
-}
-
-/* 同一段落中的左右图自动组成两列；分开成两段时仍各自独占一行 */
-.page-content p:has(> img.image-left):has(> img.image-right),
-.page-content p:has(> a.image-left):has(> a.image-right) {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-}
-
-.page-content p:has(> img.image-left):has(> img.image-right) > img,
-.page-content p:has(> a.image-left):has(> a.image-right) > a {
-  width: calc(50% - 0.5rem);
-  max-width: calc(50% - 0.5rem);
-  margin: 0;
 }
 
 .page-content h2,
@@ -317,49 +322,31 @@ html.game-route-transitioning .game-article-body {
 }
 
 @media (max-width: 680px) {
-  .page-content p.image-grid-3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .media-block--left,
+  .media-block--right {
+    max-width: 100%;
+    margin: 1rem 0;
+  }
+
+  .media-stack--left,
+  .media-stack--right {
+    float: none;
+    width: 100%;
+    max-width: 100%;
+    margin: 1rem 0;
+  }
+
+  .media-grid--2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .media-grid--3 {
     gap: clamp(0.5rem, 2.5vw, 1rem);
   }
 
-  .page-content p.image-grid-3 > a > img {
+  .media-grid--3 img {
     width: 100%;
     height: clamp(64px, 20vw, 96px);
-  }
-
-  .page-content img.image-left,
-  .page-content img.image-right {
-    max-width: 100%;
-    margin: 1rem 0;
-  }
-
-  .page-content a.image-left,
-  .page-content a.image-right {
-    max-width: 100%;
-    margin: 1rem 0;
-  }
-
-  .page-content img.image-wrap {
-    float: none;
-    width: 100%;
-    margin: 1rem 0;
-  }
-
-  .page-content a.image-wrap {
-    float: none;
-    width: 100%;
-    margin: 1rem 0;
-  }
-
-  .page-content p:has(> img.image-left):has(> img.image-right),
-  .page-content p:has(> a.image-left):has(> a.image-right) {
-    flex-direction: column;
-  }
-
-  .page-content p:has(> img.image-left):has(> img.image-right) > img,
-  .page-content p:has(> a.image-left):has(> a.image-right) > a {
-    width: 100%;
-    max-width: 100%;
   }
 }
 
