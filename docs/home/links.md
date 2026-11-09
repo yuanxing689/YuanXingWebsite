@@ -12,6 +12,3 @@ order: 30
 [![X](/images/home/x.webp)](https://x.com/Fin717152282722)
 [![Telegram](/images/home/telegram.webp)](https://t.me/yuanxinglianbanghanhuazu)
 :::
-::: media-grid 3
-[![bluesky](/images/home/bluesky.webp)](https://bsky.app/profile/yuanxinglianbang.bsky.social)
-:::
