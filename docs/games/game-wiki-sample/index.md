@@ -16,7 +16,7 @@ draft: true
 使用双列图片组展示同一类内容。
 
 ::: media-grid 2
-![未行之途封面](./images/未行之途.webp)
+![YXLB 素材](./images/YXLB.webp)
 ![YXLB 素材](./images/YXLB.webp)
 :::
 
@@ -35,7 +35,7 @@ draft: true
 需要强调横向截图时，可以使用全宽布局。
 
 ::: media-block full
-![全宽封面](./images/未行之途.webp)
+![全宽封面]!(./images/YXLB.webp)
 :::
 
 ## 内容结构
