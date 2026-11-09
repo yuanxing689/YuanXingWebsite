@@ -40,7 +40,7 @@ Ash的一生充满坎坷，即便在眼下这场麻烦之前也是如此。他�
 深入探索地球最后幸存者的生活与文化，解开他们存在核心深处的谜团。
 ### <img src="./images/箭头.webp" width="25" style="display:inline-block; vertical-align:middle;" alt="箭头"/> 每个故事都有两面
 跟随Ash和Julian截然不同的视角，见证他们如何携手并肩为生存而战。
-### <img src="./images/箭头.webp" width="25" style="display:inline-block; vertical-align:middle;" alt="箭头"> 一个完全成型的未来
+### <img src="./images/箭头.webp" width="25" style="display:inline-block; vertical-align:middle;" alt="箭头"/> 一个完全成型的未来
 欣赏大量手绘背景和动画CG，并在每次更新中不断扩充！
 
 
