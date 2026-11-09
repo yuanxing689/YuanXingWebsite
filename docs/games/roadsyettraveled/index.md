@@ -9,7 +9,7 @@ cover: /images/games/未行之途.webp
 draft: false
 ---
 
-> 不惧远高，不惧坠落，惟恐攀登之不足，见地平之辽阔——【伊科里奥德】一号（未寻回）
+><p style="text-align: center;">不惧远高，不惧坠落，惟恐攀登之不足，见地平之辽阔——【伊科里奥德】一号（未寻回）</p>
 
 ## 项目简介
 
@@ -37,16 +37,16 @@ draft: false
 
 但请继续前行吧，毕竟，你已再无旁失。
 
-## 11版本修改：  
-- 默认主角名称可热切换  
-- 字号放大，弥补不同字体的差异  
-- 去除文本中的空格，修改符号标签  
-- 翻译了最新一天  
-- 修复了已知错误  
-- 增加汉化人员列表  
+## 11版本说明：  
+1. 默认主角名称可热切换  
+2. 字号放大，弥补不同字体的差异  
+3. 去除文本中的空格，修改符号标签  
+4. 翻译了最新一天  
+5. 修复了已知错误  
+6. 增加汉化人员列表  
+7. 翻译仅供玩家参考交流，不代表当前汉化的最高品质。如遇错字、病句、译文偏离原意或严重失真请QQ反馈
 
-
-## 汉化说明
+## 汉化
 
 - 翻译：参考游戏内人员表。
 - 校对：参考游戏内人员表。
@@ -55,7 +55,7 @@ draft: false
 
 ## 主要角色
 
-### <span style="color: #F1E25D;">郎恩</span>
+### <span style="color: #F1E25D;">郎恩·蒂兰</span>
 
 ::: media-stack right
 ![郎恩](./images/郎恩.webp)
@@ -67,7 +67,7 @@ draft: false
 "我也想多了解他一些。尽管他对很多事都很坦率，却依然透着几分神秘。"  
 "我已做出选择。"  
 
-郎恩原英文名Rhoun  
+原英文名:Rhoun  
 年龄：二十七【伊耶安】周期  
 职位：【伊科里奥德】二号的维修总监  
 出生地：【伊约】赤道附近的【板区】？（游戏内未具体说明，待补充）  
@@ -77,14 +77,15 @@ draft: false
 
 
 人际关系：
-与马洛温的关系只能作为正常朋友  
-与马鲁克的关系似乎源于某次意外而导致了恶化  
+与马洛温的关系作正常朋友  
+与马鲁克的关系源于某次意外而导致了恶化  
 与作为二把手的凯斯关系十分亲密  
 与小跟班麦洛的关系十分亲密  
 与提尔，船长为上下级关系  
 
+###   
 
-### <span style="color: #43BFC7;">马洛温</span>
+### <span style="color: #43BFC7;">马洛温·森诺</span>
 
 ::: media-stack right
 ![马洛温](./images/马洛温.webp)
@@ -106,14 +107,15 @@ draft: false
 
 
 人际关系：
-与郎恩的关系只能作为正常朋友  
+与郎恩的关系为正常朋友  
 与马鲁克的关系较好  
 与佩特尔的关系较好  
 与提尔为（养）父子关系  
 与船长为普通上下级关系  
 
+###   
 
-### <span style="color: #C32148;">马鲁克</span>
+### <span style="color: #C32148;">马鲁克·塞拉斯</span>
 
 ::: media-stack right
 ![马鲁克](./images/马鲁克.webp)
@@ -139,13 +141,30 @@ draft: false
 
 人际关系：
 与马洛温的关系较好  
-与郎恩的关系似乎源于某次意外而导致了恶化  
+与郎恩的关系源于某次意外而导致了恶化  
 与诺切的关系较好  
 与泰尤的关系十分亲密  
 与提尔，船长为普通上下级关系  
 
+###    
 
-最后更新时间：2026/10/15  
-{.media-stop}
+<p style="text-align: center;">最后更新时间：2026/10/15</p>
+<p style="text-align: center;">（内容源于游戏内，并非作者原设定，并会不定期删改。）</p>
 
-（内容源于游戏内，并非作者原设定，并会不定期删改。）
+
+## 作者原链接
+
+<div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+
+  <a href="https://cryptiddog.itch.io/roadsyettraveled" target="_blank"><img src="/images/home/itch-io.webp?url" width="200" style="display:inline-block; vertical-align:middle;" alt="itch.io" /></a>
+
+  <a href="https://x.com/CryptidDog" target="_blank"><img src="/images/home/x.webp?url" width="120" style="display:inline-block; vertical-align:middle;" alt="x" /></a>
+  
+  <a href="https://www.patreon.com/cryptiddog" target="_blank"><img src="/images/home/Patreon-logo.webp?url" width="200" style="display:inline-block; vertical-align:middle;" alt="红p" /></a>
+  
+  <a href="https://discord.com/invite/QxBdjr7P3Q" target="_blank"><img src="/images/home/discord.webp?url" width="200" style="display:inline-block; vertical-align:middle;" alt="discord" /></a>
+  
+
+</div>
+
+
