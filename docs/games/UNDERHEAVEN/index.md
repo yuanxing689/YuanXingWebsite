@@ -40,13 +40,11 @@ Ash的一生充满坎坷，即便在眼下这场麻烦之前也是如此。他�
 深入探索地球最后幸存者的生活与文化，解开他们存在核心深处的谜团。
 ### <img src="./images/箭头.webp" width="25" style="display:inline-block; vertical-align:middle;" alt="箭头"/> 每个故事都有两面
 跟随Ash和Julian截然不同的视角，见证他们如何携手并肩为生存而战。
-### <img src="./images/箭头.webp" width="25" style="display:inline-block; vertical-align:middle;" alt="箭头"/> 一个完全成型的未来
-
+### <img src="./images/箭头.webp" width="25" style="display:inline-block; vertical-align:middle;" alt="箭头"> 一个完全成型的未来
 欣赏大量手绘背景和动画CG，并在每次更新中不断扩充！
 
 
 ## 7版本说明：
-
 1. 汉化第七章
 2. 同一术语名词
 3. 优化1，6，7章文本
@@ -59,13 +57,8 @@ Ash的一生充满坎坷，即便在眼下这场麻烦之前也是如此。他�
 
 ## 作者原链接
 
-<div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
-
-  <a href="https://faintlyspotted.itch.io/underheaven" target="_blank"><img src="/images/home/itch-io.webp?url" width="200" style="display:inline-block; vertical-align:middle;" alt="itch.io" /></a>
-  
-  <a href="https://www.patreon.com/cw/FaintlySpotted" target="_blank"><img src="/images/home/Patreon-logo.webp?url" width="200" style="display:inline-block; vertical-align:middle;" alt="红p" /></a>
-  
-  <a href="https://discord.com/invite/uQuNCPYU5d" target="_blank"><img src="/images/home/discord.webp?url" width="200" style="display:inline-block; vertical-align:middle;" alt="discord" /></a>
-  
-
-</div>
+::: media-grid 3
+[![itch.io](/images/home/itch-io.webp?url)](https://faintlyspotted.itch.io/underheaven)
+[![p](/images/home/Patreon-logo.webp?url)](https://www.patreon.com/cw/FaintlySpotted)
+[![discord](/images/home/discord.webp?url)](https://discord.com/invite/uQuNCPYU5d)
+:::

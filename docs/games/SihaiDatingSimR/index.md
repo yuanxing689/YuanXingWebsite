@@ -141,7 +141,7 @@ draft: false
 
 
 ## 作者原链接
-::: media-grid 2
+::: media-grid 3
 [![itch.io](/images/home/itch-io.webp)](https://iglootheraptor.itch.io/sihais-legacy)
 [![红p](/images/home/Patreon-logo.webp)](https://www.patreon.com/sihai)
 :::
