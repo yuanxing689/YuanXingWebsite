@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test'
 import {
+  GAME_FIXTURE_PATH,
   openHome,
   waitForGameDetail
 } from './helpers/site.js'
@@ -18,17 +19,46 @@ async function readImageBoxes(images) {
   )
 }
 
-test('双图和单图容器按声明布局，手机端双图改为单列', async ({ page }) => {
-  await page.goto('/games/game-wiki-sample/?motion=off')
+function expectSameRow(boxes) {
+  const firstY = boxes[0].y
+  for (const box of boxes.slice(1)) {
+    expect(Math.abs(box.y - firstY)).toBeLessThanOrEqual(2)
+  }
+}
+
+function expectDistinctColumns(boxes) {
+  for (let index = 1; index < boxes.length; index += 1) {
+    expect(boxes[index].x).toBeGreaterThan(boxes[index - 1].x + 20)
+  }
+}
+
+function expectSameCenterLine(boxes) {
+  const centerLines = boxes.map((box) => box.y + box.height / 2)
+  const firstCenter = centerLines[0]
+  for (const center of centerLines.slice(1)) {
+    expect(Math.abs(center - firstCenter)).toBeLessThanOrEqual(2)
+  }
+}
+
+test('固定画廊支持二至四列，手机端统一改为单列', async ({ page }) => {
+  await page.goto(GAME_FIXTURE_PATH)
   await waitForGameDetail(page)
 
-  const gridImages = page.locator('.media-grid--2 img')
-  await expect(gridImages).toHaveCount(2)
-  await expect(gridImages.first()).toBeVisible()
+  const galleries = [
+    { selector: '.media-grid--2', columns: 2 },
+    { selector: '.media-grid--3', columns: 3 },
+    { selector: '.media-grid--4', columns: 4 }
+  ]
 
-  const desktopBoxes = await readImageBoxes(gridImages)
-  expect(Math.abs(desktopBoxes[0].y - desktopBoxes[1].y)).toBeLessThanOrEqual(2)
-  expect(desktopBoxes[1].x).toBeGreaterThan(desktopBoxes[0].x + 100)
+  for (const gallery of galleries) {
+    const images = page.locator(`${gallery.selector} img`)
+    await expect(images).toHaveCount(gallery.columns)
+    await expect(images.first()).toBeVisible()
+
+    const boxes = await readImageBoxes(images)
+    expectSameRow(boxes)
+    expectDistinctColumns(boxes)
+  }
 
   const centerImage = page.locator('.media-block--center img')
   const fullImage = page.locator('.media-block--full img')
@@ -52,83 +82,162 @@ test('双图和单图容器按声明布局，手机端双图改为单列', async
   expect(blockPositions.fullWidthRatio).toBeGreaterThan(0.95)
 
   await page.setViewportSize({ width: 390, height: 844 })
+  for (const gallery of galleries) {
+    const images = page.locator(`${gallery.selector} img`)
+    await expect.poll(async () => {
+      const boxes = await readImageBoxes(images)
+      const sharesX = boxes.every(
+        (box) => Math.abs(box.x - boxes[0].x) <= 2
+      )
+      const descends = boxes.every(
+        (box, index) => index === 0 || box.y > boxes[index - 1].y + 20
+      )
+      return sharesX && descends
+    }).toBe(true)
+  }
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth + 1
+    )
+  ).toBe(true)
+})
+
+test('图文流按段落组成自由分行，并保持侧栏环绕', async ({ page }) => {
+  await page.goto(GAME_FIXTURE_PATH)
+  await waitForGameDetail(page)
+
+  await expect(page.locator('.media-flow--right')).toHaveCount(2)
+  const flow = page.locator('.media-flow--right').first()
+  const images = flow.locator('img')
+  await expect(images).toHaveCount(3)
+  await expect(page.locator('.media-stop')).toHaveCount(1)
+  expect(await flow.evaluate(
+    (element) => window.getComputedStyle(element).float
+  )).toBe('right')
+
+  const boxes = await readImageBoxes(images)
+  expect(boxes[1].y).toBeGreaterThan(boxes[0].y + 20)
+  expect(Math.abs(boxes[1].y - boxes[2].y)).toBeLessThanOrEqual(2)
+  expect(boxes[2].x).toBeGreaterThan(boxes[1].x + 20)
+
+  await page.setViewportSize({ width: 390, height: 844 })
+  await expect.poll(
+    () => flow.evaluate((element) => window.getComputedStyle(element).float)
+  ).toBe('none')
+  const mobileBoxes = await readImageBoxes(images)
+  expect(mobileBoxes[1].y).toBeGreaterThan(mobileBoxes[0].y + 20)
+  expect(
+    Math.abs(mobileBoxes[1].y - mobileBoxes[2].y)
+  ).toBeLessThanOrEqual(2)
+  expect(mobileBoxes[2].x).toBeGreaterThan(mobileBoxes[1].x + 20)
+})
+
+test('多图流保留纵向图片序列', async ({ page }) => {
+  await page.goto(GAME_FIXTURE_PATH)
+  await waitForGameDetail(page)
+
+  const flows = page.locator('.media-flow--right')
+  await expect(flows).toHaveCount(2)
+  const flow = flows.nth(1)
+  const flowImages = flow.locator('img')
+  await expect(flowImages).toHaveCount(3)
+  expect(await flow.evaluate(
+    (element) => window.getComputedStyle(element).float
+  )).toBe('right')
+
+  const desktopBoxes = await readImageBoxes(flowImages)
+  for (let index = 1; index < desktopBoxes.length; index += 1) {
+    expect(desktopBoxes[index].y).toBeGreaterThan(
+      desktopBoxes[index - 1].y + 20
+    )
+  }
+
+  await page.setViewportSize({ width: 390, height: 844 })
+  await expect.poll(
+    () => flow.evaluate((element) => window.getComputedStyle(element).float)
+  ).toBe('none')
+  const mobileBoxes = await readImageBoxes(flowImages)
+  for (let index = 1; index < mobileBoxes.length; index += 1) {
+    expect(mobileBoxes[index].y).toBeGreaterThan(
+      mobileBoxes[index - 1].y + 20
+    )
+  }
+})
+
+test('图标条支持一至四列，并在手机端保持单行排列', async ({ page }) => {
+  await openHome(page)
+  await page.locator('#links').scrollIntoViewIfNeeded()
+
+  const homeStrip = page.locator('.media-strip--4')
+  const homeStripImages = homeStrip.locator('img')
+  await expect(homeStripImages).toHaveCount(4)
+  const desktopBoxes = await readImageBoxes(homeStripImages)
+  expectSameCenterLine(desktopBoxes)
+  expectDistinctColumns(desktopBoxes)
+  expect(Math.max(...desktopBoxes.map((box) => box.height)))
+    .toBeLessThanOrEqual(121)
+
+  await page.setViewportSize({ width: 390, height: 844 })
   await expect.poll(async () => {
-    const boxes = await readImageBoxes(gridImages)
-    return Math.abs(boxes[0].x - boxes[1].x) <= 2 &&
-      boxes[1].y > boxes[0].y + 20
+    const boxes = await readImageBoxes(homeStripImages)
+    const firstCenter = boxes[0].y + boxes[0].height / 2
+    return boxes.every(
+      (box, index) =>
+        Math.abs(box.y + box.height / 2 - firstCenter) <= 2 &&
+        (index === 0 || box.x > boxes[index - 1].x)
+    )
   }).toBe(true)
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth + 1
     )
   ).toBe(true)
-})
 
-test('纵列图片组共用右侧浮动，三图画廊保持单行三列', async ({ page }) => {
-  await page.goto('/games/roadsyettraveled/?motion=off')
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.goto(GAME_FIXTURE_PATH)
   await waitForGameDetail(page)
 
-  await expect(page.locator('.media-stack--right')).toHaveCount(4)
-  await expect(page.locator('.media-stop')).toHaveCount(1)
-  const stack = page.locator('.media-stack--right').first()
-  const stackImages = stack.locator('img')
-  await expect(stackImages).toHaveCount(3)
-  expect(await stack.evaluate(
-    (element) => window.getComputedStyle(element).float
-  )).toBe('right')
+  const strips = [
+    { selector: '.media-strip--1', columns: 1 },
+    { selector: '.media-strip--2', columns: 2 },
+    { selector: '.media-strip--3', columns: 3 },
+    { selector: '.media-strip--4', columns: 4 }
+  ]
 
-  const stackBoxes = await readImageBoxes(stackImages)
-  expect(Math.abs(stackBoxes[0].x - stackBoxes[1].x)).toBeLessThanOrEqual(2)
-  expect(Math.abs(stackBoxes[1].x - stackBoxes[2].x)).toBeLessThanOrEqual(2)
-  expect(stackBoxes[1].y).toBeGreaterThan(stackBoxes[0].y)
-  expect(stackBoxes[2].y).toBeGreaterThan(stackBoxes[1].y)
+  for (const strip of strips) {
+    const images = page.locator(`${strip.selector} img`)
+    await expect(images).toHaveCount(strip.columns)
+    await expect(images.first()).toBeVisible()
+    const boxes = await readImageBoxes(images)
+    expectSameCenterLine(boxes)
+    expectDistinctColumns(boxes)
+    expect(Math.max(...boxes.map((box) => box.height)))
+      .toBeLessThanOrEqual(121)
+    expect(Math.max(...boxes.map((box) => box.width)))
+      .toBeLessThanOrEqual(181)
+  }
 
   await page.setViewportSize({ width: 390, height: 844 })
-  await expect.poll(
-    () => stack.evaluate((element) => window.getComputedStyle(element).float)
-  ).toBe('none')
-  const mobileStackBoxes = await readImageBoxes(stackImages)
-  expect(Math.abs(
-    mobileStackBoxes[0].x - mobileStackBoxes[1].x
-  )).toBeLessThanOrEqual(2)
-  expect(Math.abs(
-    mobileStackBoxes[1].x - mobileStackBoxes[2].x
-  )).toBeLessThanOrEqual(2)
-  expect(mobileStackBoxes[1].y).toBeGreaterThan(mobileStackBoxes[0].y)
-  expect(mobileStackBoxes[2].y).toBeGreaterThan(mobileStackBoxes[1].y)
-
-  await openHome(page)
-  const gallery = page.locator('.media-grid--3').first()
-  await gallery.scrollIntoViewIfNeeded()
-  const galleryImages = gallery.locator('img')
-  await expect(galleryImages).toHaveCount(3)
-  const galleryBoxes = await readImageBoxes(galleryImages)
-  const centerLines = galleryBoxes.map((box) => box.y + box.height / 2)
-  expect(Math.max(...centerLines) - Math.min(...centerLines))
-    .toBeLessThanOrEqual(2)
-  expect(galleryBoxes[1].x).toBeGreaterThan(galleryBoxes[0].x)
-  expect(galleryBoxes[2].x).toBeGreaterThan(galleryBoxes[1].x)
+  for (const strip of strips) {
+    const images = page.locator(`${strip.selector} img`)
+    await expect.poll(async () => {
+      const boxes = await readImageBoxes(images)
+      const firstCenter = boxes[0].y + boxes[0].height / 2
+      return boxes.every(
+        (box, index) =>
+          Math.abs(box.y + box.height / 2 - firstCenter) <= 2 &&
+          (index === 0 || box.x > boxes[index - 1].x)
+      )
+    }).toBe(true)
+    const boxes = await readImageBoxes(images)
+    expect(Math.max(...boxes.map((box) => box.height)))
+      .toBeLessThanOrEqual(97)
+    expect(Math.max(...boxes.map((box) => box.width)))
+      .toBeLessThanOrEqual(181)
+  }
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth + 1
     )
   ).toBe(true)
-})
-
-test('远端新增的 UNDERHEAVEN 页面使用全宽媒体容器', async ({ page }) => {
-  await page.goto('/games/UNDERHEAVEN/?motion=off')
-  await waitForGameDetail(page)
-
-  const fullBlock = page.locator('.media-block--full')
-  const fullImage = fullBlock.locator('img')
-  await expect(fullBlock).toHaveCount(1)
-  await expect(fullImage).toBeVisible()
-
-  const widthRatio = await page.evaluate(() => {
-    const body = document.querySelector('.game-article-body')
-    const image = document.querySelector('.media-block--full img')
-    return image.getBoundingClientRect().width /
-      body.getBoundingClientRect().width
-  })
-  expect(widthRatio).toBeGreaterThan(0.95)
 })

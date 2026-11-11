@@ -9,7 +9,7 @@ cover: /images/games/FELICITY.webp
 draft: false
 ---
 
-><p style="text-align: center;">待补充</p>
+> 待补充{.text-center}
 
 ## 待补充
 

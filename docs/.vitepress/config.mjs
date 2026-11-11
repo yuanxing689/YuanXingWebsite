@@ -6,6 +6,8 @@ import { SITE_SCROLL_OFFSET } from '../../src/app/navigation/siteScroll.js'
 const siteBase = process.env.SITE_BASE || '/'
 const normalizedBase = siteBase.endsWith('/') ? siteBase : `${siteBase}/`
 const configureSiteImages = createSiteImagePlugin(normalizedBase)
+const includeTestFixtures =
+  process.env.SITE_INCLUDE_TEST_FIXTURES === 'true'
 const siteOrigin = (
   process.env.SITE_ORIGIN || 'https://ourselves.cv'
 ).replace(/\/+$/, '')
@@ -20,7 +22,11 @@ export default defineConfig({
   title: '元星联邦',
   description: '元星联邦汉化组官网',
   cleanUrls: true,
-  srcExclude: ['home/**', 'games/README.md'],
+  srcExclude: [
+    'home/**',
+    'games/README.md',
+    ...(includeTestFixtures ? [] : ['fixtures/**'])
+  ],
   outDir: '../dist',
   scrollOffset: SITE_SCROLL_OFFSET,
   markdown: {

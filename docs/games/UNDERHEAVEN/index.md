@@ -9,15 +9,19 @@ cover: /images/games/天堂下.webp
 draft: false
 ---
 
-><p style="text-align: center;">他们累断了腰，只为把摩洛克托上天堂！人行道、树木、收音机，</p>
-<p style="text-align: center;">成吨又成吨的一切！把整座城市托上那个本就存在、且环绕着我们的天堂！</p>
-<p style="text-align: center;">《嚎叫》艾伦·金斯堡</p>
+他们累断了腰，只为把摩洛克托上天堂！人行道、树木、收音机，{.text-center}
+
+成吨又成吨的一切！把整座城市托上那个本就存在、且环绕着我们的天堂！{.text-center}
+
+《嚎叫》艾伦·金斯堡{.text-center}
 
 ## 项目简介
 
-::: media-stack right
+::: media-flow right
 ![天堂下1](./images/天堂下1.webp)
+
 ![天堂下2](./images/天堂下2.webp)
+
 ![天堂下3](./images/天堂下3.webp)
 :::
 
@@ -53,11 +57,11 @@ Ash的一生充满坎坷，即便在眼下这场麻烦之前也是如此。他�
 6. 翻译仅供玩家参考交流，不代表当前汉化的最高品质。如遇错字、病句、译文偏离原意或严重失真请QQ反馈
 
 ## 汉化人员
-### 参考游戏谢幕滚动表
+### 参考游戏设置页人员名单
 
 ## 作者原链接
 
-::: media-grid 3
+::: media-strip 3
 [![itch.io](/images/home/itch-io.webp?url)](https://faintlyspotted.itch.io/underheaven)
 [![p](/images/home/Patreon-logo.webp?url)](https://www.patreon.com/cw/FaintlySpotted)
 [![discord](/images/home/discord.webp?url)](https://discord.com/invite/uQuNCPYU5d)

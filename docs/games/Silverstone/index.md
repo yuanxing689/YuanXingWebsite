@@ -9,7 +9,7 @@ cover: /images/games/银石.webp
 draft: false
 ---
 
-><p style="text-align: center;">回去本就是个错误。有些事最好还是留在过去，因为银石镇里唯一依然存活着的，只有痛苦与折磨的化身。</p>
+> 回去本就是个错误。有些事最好还是留在过去，因为银石镇里唯一依然存活着的，只有痛苦与折磨的化身。{.text-center}
 
 ## 项目简介
 

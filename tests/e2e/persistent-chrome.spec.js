@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test'
 import {
   GAME_CARD,
   GAME_DETAIL,
+  GAME_FIXTURE_ROUTE,
   NAVIGATION,
   openHome,
   navigateHomeSection,
@@ -246,7 +247,7 @@ test('WebGL 正常时不显示降级星，真实失败时显示三颗降级星',
 test('直接访问详情、390px 手机与减少动态效果下可正常往返', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/games/roadsyettraveled/')
+  await page.goto(GAME_FIXTURE_ROUTE)
 
   await expect(page.locator(GAME_DETAIL)).toBeVisible()
   await expect(page.locator(NAVIGATION)).toBeVisible()

@@ -56,7 +56,8 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       SITE_BASE: '/',
-      SITE_ORIGIN: baseURL
+      SITE_ORIGIN: baseURL,
+      SITE_INCLUDE_TEST_FIXTURES: 'true'
     }
   }
 })

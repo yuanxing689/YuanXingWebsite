@@ -109,6 +109,7 @@ html.game-route-transitioning .game-article-body {
   --page-inline: clamp(20px, 5vw, 68px);
   position: relative;
   z-index: 1;
+  display: flow-root;
   width: min(1020px, calc(100% - 32px));
   margin: 0 auto;
   padding: 0 0 112px;
@@ -145,6 +146,19 @@ html.game-route-transitioning .game-article-body {
   text-wrap: pretty;
 }
 
+/* 对齐由 Markdown 属性 class 声明，正文不直接写 text-align。 */
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
 .home-section__markdown a {
   color: var(--site-blue);
   text-decoration: none;
@@ -157,12 +171,16 @@ html.game-route-transitioning .game-article-body {
   text-underline-offset: 4px;
 }
 
+.home-section__markdown {
+  display: flow-root;
+}
+
 .home-section__empty {
   margin: 10px 0 0;
   color: var(--site-muted);
 }
 
-/* 正文图片组由 Markdown 容器统一声明，图片元素不承担组合布局。 */
+/* 正文图片组由 Markdown 容器统一声明，段落和图片只承担内容职责。 */
 .page-content {
   --media-radius: 6px;
   --media-gap: clamp(0.5rem, 1.4vw, 0.875rem);
@@ -171,11 +189,12 @@ html.game-route-transitioning .game-article-body {
   --media-side-space: 1.5rem;
 }
 
-.page-content :is(.media-block, .media-stack, .media-grid) > p {
+.page-content :is(.media-block, .media-grid, .media-strip) > p {
   display: contents;
 }
 
-.page-content :is(.media-block, .media-stack, .media-grid) img {
+.page-content
+  :is(.media-block, .media-flow, .media-grid, .media-strip) img {
   display: block;
   max-width: 100%;
   height: auto;
@@ -183,7 +202,8 @@ html.game-route-transitioning .game-article-body {
   border-radius: var(--media-radius);
 }
 
-.page-content :is(.media-block, .media-stack, .media-grid) a {
+.page-content
+  :is(.media-block, .media-flow, .media-grid, .media-strip) a {
   display: block;
   min-width: 0;
   text-decoration: none;
@@ -231,43 +251,55 @@ html.game-route-transitioning .game-article-body {
   margin-inline: auto;
 }
 
-.media-stack,
-.media-grid {
-  gap: var(--media-gap);
-}
-
-.media-stack {
+.media-flow {
   display: grid;
+  gap: var(--media-gap);
   margin: var(--media-block-space) 0;
 }
 
-.media-stack--left,
-.media-stack--right {
+.media-flow--left,
+.media-flow--right {
   clear: both;
   width: var(--media-side-width);
   margin-block: 0.5rem 1rem;
 }
 
-.media-stack--left {
+.media-flow--left {
   float: left;
   margin-right: var(--media-side-space);
   margin-left: 0;
 }
 
-.media-stack--right {
+.media-flow--right {
   float: right;
   margin-right: 0;
   margin-left: var(--media-side-space);
 }
 
-.media-stack img,
-.media-stack a {
+.media-flow--full {
   width: 100%;
+}
+
+.media-flow > p {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: var(--media-gap);
+  min-width: 0;
+  margin: 0;
+}
+
+.media-flow img,
+.media-flow a {
+  width: 100%;
+  min-width: 0;
 }
 
 .media-grid {
   display: grid;
   align-items: start;
+  gap: var(--media-gap);
   margin: var(--media-block-space) 0;
 }
 
@@ -277,20 +309,47 @@ html.game-route-transitioning .game-article-body {
 
 .media-grid--3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: center;
 }
 
-.media-grid--2 img,
-.media-grid--2 a {
+.media-grid--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.media-grid img,
+.media-grid a {
   width: 100%;
+  min-width: 0;
 }
 
-.media-grid--3 a {
+.media-strip {
+  display: grid;
+  align-items: center;
+  gap: var(--media-gap);
+  margin: var(--media-block-space) 0;
+}
+
+.media-strip--1 {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.media-strip--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.media-strip--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.media-strip--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.media-strip a {
   display: grid;
   place-items: center;
 }
 
-.media-grid--3 img {
+.page-content .media-strip img {
   width: auto;
   max-width: min(100%, 180px);
   max-height: 120px;
@@ -299,7 +358,8 @@ html.game-route-transitioning .game-article-body {
   object-fit: contain;
 }
 
-.page-content :is(.media-block, .media-stack, .media-grid)
+.page-content
+  :is(.media-block, .media-flow, .media-grid, .media-strip)
   a:focus-visible > img {
   outline: 2px solid rgba(184, 216, 255, 0.9);
   outline-offset: 4px;
@@ -314,13 +374,6 @@ html.game-route-transitioning .game-article-body {
   clear: both;
 }
 
-.home-section__markdown::after,
-.page-content::after {
-  content: '';
-  display: table;
-  clear: both;
-}
-
 @media (max-width: 680px) {
   .media-block--left,
   .media-block--right {
@@ -328,23 +381,25 @@ html.game-route-transitioning .game-article-body {
     margin: 1rem 0;
   }
 
-  .media-stack--left,
-  .media-stack--right {
+  .media-flow--left,
+  .media-flow--right {
     float: none;
     width: 100%;
     max-width: 100%;
     margin: 1rem 0;
   }
 
-  .media-grid--2 {
+  .media-grid--2,
+  .media-grid--3,
+  .media-grid--4 {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .media-grid--3 {
+  .media-strip {
     gap: clamp(0.5rem, 2.5vw, 1rem);
   }
 
-  .media-grid--3 img {
+  .page-content .media-strip img {
     width: 100%;
     height: clamp(64px, 20vw, 96px);
   }

@@ -20,22 +20,22 @@ test('HomeReturnSnapshot 捕获、校验并更新稳定卡片键', () => {
 
   const captured = snapshots.capture({
     homeHash: '#games',
-    cardKey: '/games/roadsyettraveled/',
+    cardKey: '/games/fixture/',
     scrollY: 720
   })
   assert.deepEqual(captured, {
     version: HOME_RETURN_SNAPSHOT_VERSION,
     homeHash: '#games',
-    cardKey: '/games/roadsyettraveled/',
+    cardKey: '/games/fixture/',
     scrollY: 720
   })
   assert.deepEqual(snapshots.read(), captured)
 
   assert.equal(
-    snapshots.updateCardKey('/games/game-wiki-sample/'),
+    snapshots.updateCardKey('/games/example/'),
     true
   )
-  assert.equal(snapshots.read().cardKey, '/games/game-wiki-sample/')
+  assert.equal(snapshots.read().cardKey, '/games/example/')
 })
 
 test('损坏、旧版本或不完整快照会清除并返回空', () => {

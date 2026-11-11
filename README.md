@@ -254,6 +254,17 @@ draft: false
 - 当前正式游戏图片使用 WebP；现有中文文件名继续保留，新增文件可优先使用稳定的 ASCII slug。
 - `docs/games/` 下的三份游戏 Markdown 同时作为维护示例：分别演示图文环绕、全宽图片和双图排版。
 
+正文段落默认左对齐，使用 Markdown 属性声明其他对齐方式：
+
+```md
+居中文案。{.text-center}
+
+右对齐文案。{.text-right}
+```
+
+支持 `text-left`、`text-center`、`text-right`。不要在正文手写
+`<p style="text-align: ...">`。
+
 正文图片组使用 Markdown 容器声明布局，不再给单张图片追加
 `image-left`、`image-right` 或 `image-wrap` 等类：
 
@@ -262,13 +273,21 @@ draft: false
 ![居中图片](./images/example.webp)
 :::
 
-::: media-stack right
-![角色一](./images/character-01.webp)
-![角色二](./images/character-02.webp)
-![角色三](./images/character-03.webp)
+::: media-flow right
+![角色立绘](./images/character-01.webp)
+
+![表情一](./images/character-02.webp)
+![表情二](./images/character-03.webp)
 :::
 
-::: media-grid 3
+::: media-grid 4
+![场景一](./images/scene-01.webp)
+![场景二](./images/scene-02.webp)
+![场景三](./images/scene-03.webp)
+![场景四](./images/scene-04.webp)
+:::
+
+::: media-strip 3
 ![平台一](./images/platform-01.webp)
 ![平台二](./images/platform-02.webp)
 ![平台三](./images/platform-03.webp)
@@ -276,8 +295,11 @@ draft: false
 ```
 
 - `media-block`：单图块，支持 `left`、`right`、`center`、`full`。
-- `media-stack`：单图或多图纵向列，支持 `left`、`right`，桌面端图文环绕。
-- `media-grid`：多图横排，支持 `2`、`3` 列。
+- `media-flow`：图文环绕或全宽多行图片流，支持 `left`、`right`、`full`；
+  同一段落中的图片并排，空行开始新的行。
+- `media-grid`：固定等宽画廊，支持 `2`、`3`、`4` 列。
+- `media-strip`：紧凑平台图标，支持 `1`、`2`、`3`、`4` 列；手机端保持
+  声明的列数并排显示。
 - 图片容器内只放图片，不混入正文段落。
 - 直接图片和链接图片使用同一套布局规则。
 
