@@ -157,17 +157,32 @@ Markdown 使用相对路径：
 
 不建议把正文截图全部放进 `docs/public/`；只有需要多个页面共享的图片才放到 public。
 
+## 正文文字对齐
+
+段落默认左对齐。需要居中或右对齐时，在段落内容后追加属性 class：
+
+```md
+居中的引文。{.text-center}
+
+右对齐的署名。{.text-right}
+```
+
+支持 `text-left`、`text-center`、`text-right`。引用块也可以使用：
+
+```md
+> 引用中的居中段落。{.text-center}
+```
+
+不要在正文直接写 `<p style="text-align: ...">`。段落最后是链接、粗体等
+行内元素时，把 `{.text-center}` 单独放到下一行，避免属性附着到该行内元素。
+
 ## 正文图片容器
 
 图片组布局由 Markdown 容器决定，不再给单张图片追加
 `image-left`、`image-right`、`image-wrap` 等布局类。
 
-容器内只放图片，不要混入普通段落。直接图片和链接图片使用相同写法，
-段落之间是否留空行不会改变布局。
-
-Markdown 会为容器内的图片生成 `<p>`。主题对这个图片专用段落使用
-`display: contents`，让图片直接参与外层 Grid；因此正文、图片说明或 caption
-不应放进这三个图片容器。
+容器内只放图片，不要混入正文、图片说明或 caption。直接图片和链接图片
+使用相同写法。布局分为单图块、多图流、固定画廊和图标条四类。
 
 ### 单图块
 
@@ -190,23 +205,29 @@ Markdown 会为容器内的图片生成 `<p>`。主题对这个图片专用段�
 - `full` 占满正文宽度。
 - 图片默认带 `6px` 圆角。
 
-### 单图或多图纵列环绕
+### 多图流与自由分行
 
-`media-stack` 把一整组图片当成一个纵向列。桌面端的 `left`、`right`
-表示整个列的浮动方向：
+`media-flow` 支持 `left`、`right`、`full`。`left`、`right` 在桌面端
+让正文环绕整个图片组，`full` 保持正文全宽。
+
+同一段落中的图片会自动等宽并排，空行开始新的图片行：
 
 ```md
-::: media-stack right
-![角色一](./images/character-01.webp)
-![角色二](./images/character-02.webp)
-![角色三](./images/character-03.webp)
+::: media-flow right
+![角色立绘](./images/character-01.webp)
+
+![表情一](./images/character-02.webp)
+![表情二](./images/character-03.webp)
 :::
 
-这段正文会环绕在图片列左侧。三张图片在列内按照顺序纵向排列。
+这段正文会环绕在图片组左侧。图片组由“一行一张、一行两张”组成。
 ```
 
-图片列宽度为 `min(42%, 360px)`。组内间距由主题统一控制，不需要给每张
-图片设置 margin。
+每行放置几张图片由该段落的图片数决定，不限制为固定两列或三列。需要
+纵向排列时，在每张图片之间保留空行。组内间距由主题统一控制，不需要给
+单张图片设置 margin。
+
+侧栏宽度为 `min(42%, 360px)`。手机端取消浮动，但保留作者声明的分行方式。
 
 ### 停止环绕
 
@@ -220,32 +241,37 @@ Markdown 会为容器内的图片生成 `<p>`。主题对这个图片专用段�
 {.media-stop}
 ```
 
-### 两图并排
+### 固定画廊
 
-```md
-::: media-grid 2
-![左图](./images/left.webp)
-![右图](./images/right.webp)
-:::
-```
-
-- 桌面端固定两列。
-- 小于 `680px` 时改为纵向单列。
-- 直接图片和链接图片都受同一套 Grid 规则控制。
-
-### 三图并排
+`media-grid` 支持 `2`、`3`、`4`，适合所有图片应等宽排列的内容画廊：
 
 ```md
 ::: media-grid 3
-[![平台一](./images/platform-1.webp)](https://example.com)
-[![平台二](./images/platform-2.webp)](https://example.com)
-[![平台三](./images/platform-3.webp)](https://example.com)
+![场景一](./images/scene-01.webp)
+![场景二](./images/scene-02.webp)
+![场景三](./images/scene-03.webp)
 :::
 ```
 
-- 桌面端与手机端都保持三列。
-- 单图最大 `180×120px`，保持比例并垂直居中。
-- 手机端缩小间距与图片高度。
+- 图片始终填满各自列宽。
+- 段落空行不会形成独立图片行，所有图片按固定列数自动换行。
+- 小于 `680px` 时，`2`、`3`、`4` 列都改为单列。
+
+### 平台图标
+
+社交链接、平台徽标等紧凑内容使用 `media-strip`，支持 `1`、`2`、`3`、`4`：
+
+```md
+::: media-strip 3
+[![itch.io](/images/home/itch-io.webp)](https://example.com)
+[![X](/images/home/x.webp)](https://example.com)
+[![Discord](/images/home/discord.webp)](https://example.com)
+:::
+```
+
+- 单图最大 `180×120px`，保持比例并居中。
+- 手机端保持声明的 `1/2/3/4` 列，不自动折到下一行。
+- 手机端会缩小间距和图片高度，避免横向溢出。
 - 链接图片的 `alt` 应写对应平台名称。
 
 ### 手机端行为
@@ -253,9 +279,9 @@ Markdown 会为容器内的图片生成 `<p>`。主题对这个图片专用段�
 屏幕宽度小于 `680px` 时：
 
 - `media-block left/right` 自动取消半栏宽度。
-- `media-stack left/right` 取消浮动，按全宽纵向排列。
-- `media-grid 2` 自动改为单列。
-- `media-grid 3` 保持三列，适合平台图标或小型缩略图。
+- `media-flow left/right` 取消浮动，但行内图片仍按段落并排。
+- `media-grid 2/3/4` 自动改为单列。
+- `media-strip 1/2/3/4` 保持各自列数并排显示。
 
 ## 新增游戏流程
 

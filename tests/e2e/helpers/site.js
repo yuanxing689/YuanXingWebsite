@@ -6,6 +6,8 @@ export const NAVIGATION = 'nav[aria-label="主导航"]'
 export const GAME_CAROUSEL_VIEWPORT = '.game-carousel__viewport'
 export const GAME_CARD = 'a.game-card__link'
 export const GAME_DETAIL = 'main.page-content--article.page-content--game'
+export const GAME_FIXTURE_ROUTE = '/fixtures/media-layout/'
+export const GAME_FIXTURE_PATH = `${GAME_FIXTURE_ROUTE}?motion=off`
 
 export async function openHome(page) {
   await page.goto(HOME_PATH)

@@ -9,15 +9,20 @@ cover: /images/games/四海.webp
 draft: false
 ---
 
-><p style="text-align: center;">让我们回去。回去，并记住我们共同的“遗产”。</p>
+让我们回去。回去，并记住我们共同的“遗产”。{.text-right}
+
 
 ## 项目简介
 
-::: media-stack right
+::: media-flow right
 ![四海展示1](./images/四海展示1.webp)
+
 ![四海展示2](./images/四海展示2.webp)
+
 ![四海展示3](./images/四海展示3.webp)
+
 ![四海展示4](./images/四海展示4.webp)
+
 ![四海展示5](./images/四海展示5.webp)
 :::
 
@@ -58,7 +63,7 @@ draft: false
 ## 主要角色
 
 ### 亚历克斯·约翰逊？
-::: media-stack right
+::: media-flow right
 ![阿马迪乌斯](./images/阿马迪乌斯.webp)
 :::
 
@@ -70,7 +75,7 @@ draft: false
 
 ### <span style="color: #C01E10;">埃</span><span style="color: #A8640E;">里</span><span style="color: #0FACD3;">克</span><span style="color: #00B02B;">?</span>
 
-::: media-stack right
+::: media-flow right
 ![萨利埃里](./images/萨利埃里.webp)
 :::
 
@@ -82,7 +87,7 @@ draft: false
 ###   
 
 ### <span style="color: #524A61;">龙沈</span>
-::: media-stack right
+::: media-flow right
 ![沈](./images/沈.webp)
 :::
 原英文名：Long shen  
@@ -92,7 +97,7 @@ draft: false
 ###   
 
 ### <span style="color: #C01E10;">耶户·泰尔</span>
-::: media-stack right
+::: media-flow right
 ![耶户](./images/耶户.webp)
 :::
 原英文名：Jehu Tyre  
@@ -102,7 +107,7 @@ draft: false
 ###   
 
 ### <span style="color: #00B02B;">保罗？</span>
-::: media-stack right
+::: media-flow right
 ![保罗](./images/保罗.webp)
 :::
 原英文名：Paul？  
@@ -112,7 +117,7 @@ draft: false
 ###   
 
 ### <span style="color: #0FACD3;">豪尔赫·戈德伯格</span>
-::: media-stack right
+::: media-flow right
 ![豪尔赫](./images/豪尔赫.webp)
 :::
 原英文名：Jorge·Goldberg  
@@ -123,7 +128,7 @@ draft: false
 
 
 ### <span style="color: #A8640E;">艾伦·加西亚</span>
-::: media-stack right
+::: media-flow right
 ![艾伦](./images/艾伦.webp)
 :::
 原英文名：Alan García.  
@@ -135,13 +140,14 @@ draft: false
 
 ###   
 
-<p style="text-align: center;">最后更新时间：2026/10/15</p>
-<p style="text-align: center;">（内容源于游戏内，并非作者原设定，并会不定期删改。）</p>
+最后更新时间：2026/10/15{.text-right}
+
+（内容源于游戏内，并非作者原设定，并会不定期删改。）{.text-right}
 
 
 
 ## 作者原链接
-::: media-grid 3
+::: media-strip 2
 [![itch.io](/images/home/itch-io.webp)](https://iglootheraptor.itch.io/sihais-legacy)
 [![红p](/images/home/Patreon-logo.webp)](https://www.patreon.com/sihai)
 :::

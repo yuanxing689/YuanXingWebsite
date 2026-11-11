@@ -4,7 +4,7 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:4173'
 const isCI = Boolean(process.env.CI)
 const browserChannel = process.env.PLAYWRIGHT_BROWSER_CHANNEL || undefined
 const browserProject = browserChannel === 'msedge' ? 'edge' : 'chromium'
-const chromiumLaunchOptions = isCI && !browserChannel
+const chromiumLaunchOptions = isCI
   ? {
       args: [
         '--use-angle=swiftshader',
@@ -56,7 +56,8 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       SITE_BASE: '/',
-      SITE_ORIGIN: baseURL
+      SITE_ORIGIN: baseURL,
+      SITE_INCLUDE_TEST_FIXTURES: 'true'
     }
   }
 })

@@ -9,13 +9,15 @@ cover: /images/games/未行之途.webp
 draft: false
 ---
 
-><p style="text-align: center;">不惧远高，不惧坠落，惟恐攀登之不足，见地平之辽阔——【伊科里奥德】一号（未寻回）</p>
+不惧远高，不惧坠落，惟恐攀登之不足，见地平之辽阔——【伊科里奥德】一号（未寻回）{.text-right}
 
 ## 项目简介
 
-::: media-stack right
+::: media-flow right
 ![郎恩主页](./images/郎恩主页.webp)
+
 ![马鲁克主页](./images/马鲁克主页.webp)
+
 ![马洛温主页](./images/马洛温主页.webp)
 :::
 
@@ -57,7 +59,7 @@ draft: false
 
 ### <span style="color: #F1E25D;">郎恩·蒂兰</span>
 
-::: media-stack right
+::: media-flow right
 ![郎恩](./images/郎恩.webp)
 :::
 
@@ -87,7 +89,7 @@ draft: false
 
 ### <span style="color: #43BFC7;">马洛温·森诺</span>
 
-::: media-stack right
+::: media-flow right
 ![马洛温](./images/马洛温.webp)
 :::
 
@@ -117,7 +119,7 @@ draft: false
 
 ### <span style="color: #C32148;">马鲁克·塞拉斯</span>
 
-::: media-stack right
+::: media-flow right
 ![马鲁克](./images/马鲁克.webp)
 :::
 
@@ -148,23 +150,17 @@ draft: false
 
 ###    
 
-<p style="text-align: center;">最后更新时间：2026/10/15</p>
-<p style="text-align: center;">（内容源于游戏内，并非作者原设定，并会不定期删改。）</p>
+最后更新时间：2026/10/15{.text-right}
+
+（内容源于游戏内，并非作者原设定，并会不定期删改。）{.text-right}
 
 
 ## 作者原链接
-
-<div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
-
-  <a href="https://cryptiddog.itch.io/roadsyettraveled" target="_blank"><img src="/images/home/itch-io.webp?url" width="200" style="display:inline-block; vertical-align:middle;" alt="itch.io" /></a>
-
-  <a href="https://x.com/CryptidDog" target="_blank"><img src="/images/home/x.webp?url" width="120" style="display:inline-block; vertical-align:middle;" alt="x" /></a>
-  
-  <a href="https://www.patreon.com/cryptiddog" target="_blank"><img src="/images/home/Patreon-logo.webp?url" width="200" style="display:inline-block; vertical-align:middle;" alt="红p" /></a>
-  
-  <a href="https://discord.com/invite/QxBdjr7P3Q" target="_blank"><img src="/images/home/discord.webp?url" width="200" style="display:inline-block; vertical-align:middle;" alt="discord" /></a>
-  
-
-</div>
+::: media-strip 4
+[![itch.io](/images/home/itch-io.webp)](https://cryptiddog.itch.io/roadsyettraveled)
+[![红p](/images/home/Patreon-logo.webp)](https://www.patreon.com/sihai)
+[![x](/images/home/x.webp)](https://x.com/CryptidDog)
+[![discord](/images/home/discord.webp)](https://discord.com/invite/QxBdjr7P3Q)
+:::
 
 

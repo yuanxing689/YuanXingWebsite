@@ -35,11 +35,13 @@ jobs:
       - name: Run unit tests
         run: npm run test:unit
 
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Verify Chrome
+        run: google-chrome --version
 
       - name: Run browser behavior tests
         run: npm run test:e2e
+        env:
+          PLAYWRIGHT_BROWSER_CHANNEL: chrome
 
       - name: Upload test artifacts
         if: failure()

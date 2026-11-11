@@ -1,8 +1,9 @@
 import container from 'markdown-it-container'
 
 const BLOCK_POSITIONS = new Set(['left', 'right', 'center', 'full'])
-const STACK_POSITIONS = new Set(['left', 'right'])
-const GRID_COLUMNS = new Set(['2', '3'])
+const FLOW_POSITIONS = new Set(['left', 'right', 'full'])
+const GRID_COLUMNS = new Set(['2', '3', '4'])
+const STRIP_COLUMNS = new Set(['1', '2', '3', '4'])
 
 function readContainerOption(info, name, allowedOptions) {
   const parts = info.trim().split(/\s+/)
@@ -42,13 +43,18 @@ export function registerMediaContainers(md) {
     className: 'media-block'
   })
   registerOptionContainer(md, {
-    name: 'media-stack',
-    allowedOptions: STACK_POSITIONS,
-    className: 'media-stack'
+    name: 'media-flow',
+    allowedOptions: FLOW_POSITIONS,
+    className: 'media-flow'
   })
   registerOptionContainer(md, {
     name: 'media-grid',
     allowedOptions: GRID_COLUMNS,
     className: 'media-grid'
+  })
+  registerOptionContainer(md, {
+    name: 'media-strip',
+    allowedOptions: STRIP_COLUMNS,
+    className: 'media-strip'
   })
 }

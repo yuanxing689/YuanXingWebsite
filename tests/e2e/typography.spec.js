@@ -1,8 +1,11 @@
 import { test, expect } from '@playwright/test'
-import { waitForGameDetail } from './helpers/site.js'
+import {
+  GAME_FIXTURE_PATH,
+  waitForGameDetail
+} from './helpers/site.js'
 
 test('正文和三级标题保持清晰的字号与颜色层级', async ({ page }) => {
-  await page.goto('/games/roadsyettraveled/?motion=off')
+  await page.goto(GAME_FIXTURE_PATH)
   await waitForGameDetail(page)
 
   const readType = () => page.evaluate(() => {
@@ -37,4 +40,34 @@ test('正文和三级标题保持清晰的字号与颜色层级', async ({ page 
   const mobile = await readType()
   expect(mobile.paragraph.fontSize).toBe(17)
   expect(mobile.heading3.fontSize).toBeGreaterThan(21)
+})
+
+test('正文段落支持左中右对齐且不使用内联样式', async ({ page }) => {
+  await page.goto(GAME_FIXTURE_PATH)
+  await waitForGameDetail(page)
+
+  const readAlignment = (text) => page.evaluate((content) => {
+    const paragraph = [...document.querySelectorAll('.game-article-body p')]
+      .find((element) => element.textContent.includes(content))
+    const computed = window.getComputedStyle(paragraph)
+    return {
+      styleAttribute: paragraph.getAttribute('style'),
+      textAlign: computed.textAlign
+    }
+  }, text)
+
+  for (const alignment of [
+    { text: '左对齐段落', expected: 'left' },
+    { text: '居中对齐段落', expected: 'center' },
+    { text: '右对齐段落', expected: 'right' },
+    { text: '引用中的居中段落', expected: 'center' }
+  ]) {
+    const result = await readAlignment(alignment.text)
+    expect(result.styleAttribute).toBeNull()
+    expect(result.textAlign).toBe(alignment.expected)
+  }
+
+  await page.setViewportSize({ width: 390, height: 844 })
+  expect((await readAlignment('居中对齐段落')).textAlign).toBe('center')
+  expect((await readAlignment('右对齐段落')).textAlign).toBe('right')
 })

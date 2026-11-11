@@ -115,6 +115,25 @@ Markdown 使用站点绝对路径：
 - 为图片写清楚的 `alt`。
 - 显示尺寸不超过实际需要的两倍。
 
+## 文字对齐
+
+段落默认左对齐，支持以下属性 class：
+
+```md
+居中文案。{.text-center}
+
+右对齐文案。{.text-right}
+```
+
+引用块同样适用：
+
+```md
+> 居中引用。{.text-center}
+```
+
+不要直接写 `<p style="text-align: ...">`。段落末尾是链接或粗体时，将属性
+单独放到下一行，确保 class 作用于段落而不是行内元素。
+
 ## 图片布局容器
 
 首页图片不再给单张图片追加布局类，而是用容器声明整个图片组的布局。
@@ -130,18 +149,22 @@ Markdown 使用站点绝对路径：
 
 `media-block` 支持 `left`、`right`、`center`、`full`。
 
-### 单图或多图环绕
+### 多图流与自由分行
 
 ```md
-::: media-stack left
-![现场照片](/images/home/activity-01.webp)
-![现场照片](/images/home/activity-02.webp)
+::: media-flow left
+![活动主图](/images/home/activity-01.webp)
+
+![活动现场一](/images/home/activity-02.webp)
+![活动现场二](/images/home/activity-03.webp)
 :::
 
 这段文字会环绕在图片组右侧。
 ```
 
-`media-stack` 支持 `left`、`right`。桌面端浮动整个图片组，手机端取消浮动。
+`media-flow` 支持 `left`、`right`、`full`。桌面端由 `left`、`right`
+控制图片组浮动，手机端取消浮动。同一段落中的图片并排，空行开始新的
+图片行。
 
 需要提前结束环绕时，在第一个恢复正常宽度的段落末尾添加：
 
@@ -150,7 +173,7 @@ Markdown 使用站点绝对路径：
 {.media-stop}
 ```
 
-### 两图与三图
+### 固定画廊
 
 ```md
 ::: media-grid 2
@@ -161,15 +184,27 @@ Markdown 使用站点绝对路径：
 
 ```md
 ::: media-grid 3
+![活动一](/images/home/activity-01.webp)
+![活动二](/images/home/activity-02.webp)
+![活动三](/images/home/activity-03.webp)
+:::
+```
+
+- `media-grid` 支持 `2`、`3`、`4`，图片填充各列。
+- 手机端统一改为单列。
+
+### 平台图标
+
+```md
+::: media-strip 3
 [![itch.io](/images/home/itch-io.webp)](https://example.com)
 [![X](/images/home/x.webp)](https://example.com)
 [![Telegram](/images/home/telegram.webp)](https://example.com)
 :::
 ```
 
-- `media-grid 2` 在桌面端两列，手机端单列。
-- `media-grid 3` 在桌面和手机都保持三列，适合平台图标。
-- 三列图片最大 `180×120px`，并保持比例。
+`media-strip` 支持 `1`、`2`、`3`、`4`，单图最大 `180×120px`。
+手机端保持声明的列数并排显示，并缩小间距和图片高度。
 
 ## 修改后检查
 

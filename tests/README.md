@@ -25,11 +25,18 @@
 - Three.js 只有一个持续循环，导航相位跨路由不回零。
 - 主星 LOGO 与导航玻璃的静态交接。
 - WebGL 正常与真实失败降级。
-- `media-block` 单图、`media-stack` 纵列、`media-grid` 双列与三列布局。
+- `media-block` 单图、`media-flow` 自由分行、`media-grid` 固定画廊和
+  `media-strip` 1 至 4 列图标条布局。
+- 正文左、中、右段落对齐和引用块对齐，确保不使用内联 `text-align`。
 - 正文 17px、增强后的正文颜色，以及 `h2`/`h3` 的可读层级比例。
 - 390px 手机、减少动态效果和不支持 View Transitions 的路径。
 - 资源监听器、rAF 和定时器不跨路由累积。
 - 常规路由流程无未捕获异常或 `console.error`。
+
+CI 中的页面布局、正文排版和详情页往返使用专用夹具
+`/fixtures/media-layout/`，不依赖任何正式游戏页面。夹具源文件为
+`docs/fixtures/media-layout.md`，仅在 Playwright 启动开发服务器时通过
+`SITE_INCLUDE_TEST_FIXTURES=true` 纳入，生产构建默认排除。
 
 ### 人工视觉基准
 
@@ -40,7 +47,8 @@
 
 Chromium 和 Edge 各维护独立快照。像素差异上限固定为 `0.1%`，不得通过
 更新基准图掩盖视觉回归。该套件保留用于本地人工比对，当前不纳入 CI 必过
-检查；布局行为由 `media-layout.spec.js` 的尺寸和位置断言覆盖。
+检查；它可以选择代表性真实页面，布局行为由 `media-layout.spec.js` 的
+夹具尺寸和位置断言覆盖。
 
 ## 本地运行
 
