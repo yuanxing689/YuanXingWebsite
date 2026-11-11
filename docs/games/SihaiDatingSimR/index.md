@@ -9,7 +9,7 @@ cover: /images/games/四海.webp
 draft: false
 ---
 
-让我们回去。回去，并记住我们共同的“遗产”。{.text-center}
+让我们回去。回去，并记住我们共同的“遗产”。{.text-right}
 
 
 ## 项目简介
