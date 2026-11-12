@@ -1,6 +1,6 @@
 ---
 title: 元星联邦
-description: 元星联邦汉化组官网。
+description: 元星联邦汉化组——一个独立兽人视觉小说的中文本地化组织
 ---
 
 <script setup>
