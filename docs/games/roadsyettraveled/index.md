@@ -9,7 +9,11 @@ cover: /images/games/未行之途.webp
 draft: false
 ---
 
-不惧远高，不惧坠落，惟恐攀登之不足，见地平之辽阔——【伊科里奥德】一号（未寻回）{.text-right}
+不惧远高，不惧坠落，{.text-right}
+
+惟恐攀登之不足，见地平之辽阔。{.text-right}
+
+————【伊科里奥德】一号（未寻回）{.text-right}
 
 ## 项目简介
 

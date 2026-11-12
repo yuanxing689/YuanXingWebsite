@@ -9,7 +9,9 @@ cover: /images/games/天堂下.webp
 draft: false
 ---
 
-他们累断了腰，只为把摩洛克托上天堂！人行道、树木、收音机，成吨又成吨的一切！{.text-right}
+他们累断了腰，只为把摩洛克托上天堂！{.text-right}
+
+人行道、树木、收音机，成吨又成吨的一切！{.text-right}
 
 把整座城市托上那个本就存在、且环绕着我们的天堂！{.text-right}
 
