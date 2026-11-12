@@ -2,7 +2,7 @@
 type: game
 id: UNDER|HEAVEN
 title: 天堂下
-description: 天堂下的页面结构示例。
+description: 天堂下（Under | Haven）汉化Wiki
 status: translating
 order: 20
 cover: /images/games/天堂下.webp

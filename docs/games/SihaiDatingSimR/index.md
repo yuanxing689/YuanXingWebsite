@@ -2,7 +2,7 @@
 type: game
 id: SihaiDatingSimR
 title: 四海的遗产
-description: 四海的汉化项目资料页
+description: 四海（SihaiDatingSimR）汉化Wiki
 status: translating
 order: 30
 cover: /images/games/四海.webp
