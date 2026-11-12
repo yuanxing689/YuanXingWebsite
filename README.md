@@ -332,8 +332,8 @@ draft: false
   声明为斜体会被浏览器二次倾斜。
 - 得意黑只有 Regular 一个字重，使用处固定 `font-weight: 400` 并设置
   `font-synthesis: none`，避免浏览器合成粗体把发光笔画糊掉。
-- 字体文件 1.15 MB，是首屏最重的资源，使用 `font-display: block`：
-  3 秒内到达就直接呈现得意黑，超过才回退系统黑体后替换。
+- 字体文件 1.15 MB，是首屏最重的资源，使用 `font-display: swap`：
+  字标先以系统黑体呈现，字体到达后替换为得意黑。
 - 字标宽度系数在 `src/components/chrome/brandGeometry.js`，按得意黑
   汉字步进 0.8em 与 `letter-spacing` 推导；改字号或字距时必须同步重算。
 
