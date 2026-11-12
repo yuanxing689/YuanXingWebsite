@@ -314,6 +314,29 @@ draft: false
 
 修改品牌资源时，需要同时检查桌面导航、手机品牌毛玻璃、详情页头部和开场结束状态。
 
+### 字体与许可证
+
+首页品牌字标「元星联邦」与三个导航标签使用
+[得意黑 Smiley Sans](https://github.com/atelier-anchor/smiley-sans) v2.0.1；
+正文和其余界面继续使用系统字体栈，换字体不影响阅读排版。
+
+- 字体文件：`src/assets/fonts/smiley-sans-oblique.woff2`，官方原版，
+  未做任何修改。
+- 许可证：`src/assets/fonts/smiley-sans-LICENSE.txt`，SIL Open Font License 1.1。
+  原版文件保持不变、按原样分发时可以直接沿用字体原名；一旦裁剪字形或
+  修改字体文件（OFL 定义的 Modified Version），必须先按第 3 条避开
+  保留字体名 `Smiley` 与 `得意黑`。
+- 声明入口：`src/styles/fonts.css`；只有 `.brand-wordmark__text` 和
+  `.star-navigation__label` 使用该字族，`:root` 的系统字体栈不动。
+- `@font-face` 必须声明 `font-style: normal`：得意黑的倾斜做在字形内部，
+  声明为斜体会被浏览器二次倾斜。
+- 得意黑只有 Regular 一个字重，使用处固定 `font-weight: 400` 并设置
+  `font-synthesis: none`，避免浏览器合成粗体把发光笔画糊掉。
+- 字体文件 1.15 MB，是首屏最重的资源，使用 `font-display: block`：
+  3 秒内到达就直接呈现得意黑，超过才回退系统黑体后替换。
+- 字标宽度系数在 `src/components/chrome/brandGeometry.js`，按得意黑
+  汉字步进 0.8em 与 `letter-spacing` 推导；改字号或字距时必须同步重算。
+
 ## 状态与调试
 
 ### 开场

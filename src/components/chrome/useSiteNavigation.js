@@ -3,7 +3,9 @@ import { toSiteHref } from '../../app/navigation/sitePaths.js'
 
 const MOBILE_BREAKPOINT = 680
 const DESKTOP_NAVIGATION_CENTER_Y = 45
-const MOBILE_NAVIGATION_CENTER_OFFSET = 64
+// 手机端导航在毛玻璃里居中按「文字 + 星」整组计算：星心比玻璃中心低 6px，
+// 正好抵掉顶部文字的高度，整组视觉中心才落在玻璃中线上。
+const MOBILE_NAVIGATION_CENTER_OFFSET = 58
 const DESKTOP_NAVIGATION_RIGHT_OFFSET = 388
 const DESKTOP_NAVIGATION_SPACING = 124
 

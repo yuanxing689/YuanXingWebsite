@@ -69,7 +69,7 @@ defineExpose({ updateLight })
   position: absolute;
   top: calc(50% + min(34vw, 310px, 36vh));
   left: 50%;
-  font-size: calc(min(68vw, 620px, 72vh) * 0.195);
+  font-size: calc(min(68vw, 620px, 72vh) * 0.21);
   transform: translate(-50%, -56%);
 }
 
@@ -79,12 +79,15 @@ defineExpose({ updateLight })
   display: block;
   margin: 0;
   padding-block: var(--wordmark-bleed);
-  padding-left: 0.18em;
+  padding-left: 0.14em;
   color: transparent;
   white-space: nowrap;
+  font-family: 'Smiley Sans', 'Microsoft YaHei', 'PingFang SC', sans-serif;
   font-size: inherit;
-  font-weight: 700;
-  letter-spacing: 0.18em;
+  /* 得意黑只有 Regular 一个字重，声明 700 会触发合成粗体，在发光叠加下会糊 */
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0.14em;
   line-height: 1;
 }
 
@@ -141,13 +144,6 @@ defineExpose({ updateLight })
   -webkit-background-clip: text;
   opacity: calc(var(--light-opacity, 0) * var(--intro-glow, 1));
   filter: drop-shadow(0 0 5px rgba(255, 249, 219, 0.92));
-}
-
-@media (max-width: 640px) {
-  .brand-wordmark__text {
-    letter-spacing: 0.12em;
-    padding-left: 0.12em;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

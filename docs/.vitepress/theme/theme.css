@@ -1,4 +1,5 @@
 @import '../../../src/styles/global.css';
+@import '../../../src/styles/fonts.css';
 
 :root {
   --site-line: rgba(157, 185, 255, 0.2);
