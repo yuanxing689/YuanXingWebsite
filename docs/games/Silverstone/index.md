@@ -2,7 +2,7 @@
 type: game
 id: Silverstone
 title: 银石镇
-description: 银色的汉化项目资料页
+description: 银石镇（Silverstone）汉化Wiki
 status: translating
 order: 60
 cover: /images/games/银石.webp

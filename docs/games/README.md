@@ -13,15 +13,18 @@ docs/games/
 
 构建后的默认路由为 `/games/example-game/`。目录名建议使用稳定、可分享的 ASCII slug。
 
-当前仓库提供的三份规范样例：
+当前仓库提供的两份规范样例：
 
 | 页面 | 演示重点 |
 | --- | --- |
 | `roadsyettraveled` | 项目简介、右侧图文环绕和停止环绕。 |
 | `UNDERHEAVEN` | 天堂下页面，演示全宽正文图片、列表和进度结构。 |
-| `game-wiki-sample` | 双图并排、居中图片和全宽图片。 |
 
-其他带“副本”字样的目录仅保留为本地测试页，已设置 `draft: true`，不会出现在首页游戏目录。
+完整的 Markdown 排版样例（段落对齐、图文环绕、画廊和图标条）放在
+`docs/fixtures/game-wiki-sample.md`，生产构建会排除，可直接复制其结构。
+
+`draft: true` 只过滤首页游戏目录卡片，页面仍会正常构建并进入 sitemap。
+不希望被搜索引擎收录的页面应放进 `docs/fixtures/`，而不是只靠 draft。
 
 ## Frontmatter 字段
 

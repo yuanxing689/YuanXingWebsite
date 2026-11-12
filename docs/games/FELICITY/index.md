@@ -2,7 +2,7 @@
 type: game
 id: FELICITY
 title: FELICITY
-description: FELICITY的项目资料页
+description: FELICITY，一个微恐FVN
 status: translating
 order: 40
 cover: /images/games/FELICITY.webp
