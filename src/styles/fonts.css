@@ -1,0 +1,19 @@
+/**
+ * 品牌展示字体：得意黑（Smiley Sans）原版文件，未做任何修改。
+ *
+ * 只服务首页品牌字标「元星联邦」与三个导航标签；正文和其余界面继续
+ * 使用 global.css 里的系统字体栈，所以换字体不会影响阅读排版。
+ *
+ * 字体体积 1.15 MB，是首屏最重的一项资源。采用 block 策略：字体在 3 秒
+ * 阻塞期内到达就直接以得意黑呈现，字标不会先亮出系统黑体再跳变；超过
+ * 3 秒才回退到系统黑体，并在字体到达后替换。
+ * 字体按 SIL OFL 1.1 原样分发，许可证全文见同目录 smiley-sans-LICENSE.txt。
+ */
+@font-face {
+  font-family: 'Smiley Sans';
+  /* 得意黑的倾斜已在字形内部完成，这里必须声明 normal，否则浏览器会二次倾斜 */
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('../assets/fonts/smiley-sans-oblique.woff2') format('woff2');
+}

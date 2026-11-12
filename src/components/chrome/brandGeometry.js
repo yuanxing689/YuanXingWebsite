@@ -19,6 +19,8 @@ function getBrandLayout(viewport) {
     logoCenterX: insetX + logoSize / 2,
     logoCenterY: insetY + logoSize / 2,
     wordmarkLeft: insetX + logoSize + gap,
+    // 收拢字标比桌面导航标签（0.8125rem / 13px）大一号。字标用的是低饱和
+    // 蓝色渐变，同字号下比亮色的导航标签显得更轻，需要 14px 才撑住体量。
     wordmarkFontSize: compact ? 13 : 14
   }
 }
@@ -37,7 +39,7 @@ function getHeroAnchorStyle(viewport, layout, progress) {
 
 function getWordmarkStyle(viewport, layout, progress) {
   const startSize = Math.min(viewport.width * 0.68, 620, viewport.height * 0.72)
-  const startFontSize = startSize * 0.195
+  const startFontSize = startSize * 0.21
   const startTop = viewport.height / 2 + startSize * 0.425 + 20
 
   return {
@@ -49,7 +51,10 @@ function getWordmarkStyle(viewport, layout, progress) {
 }
 
 function getBrandHomeStyle(layout) {
-  const wordmarkWidth = layout.wordmarkFontSize * 4.9
+  // 字标宽度 = 字号 × (4 个汉字 + 5 段字距)，5 段 = 4 个字距 + 1 个左侧补偿。
+  // 得意黑是窄体，汉字步进只有 0.8em，和雅黑的 1em 不同，系数须随之重算：
+  // 4 × 0.8 + 5 × 0.14 = 3.9。改字号或 letter-spacing 时必须同步这里。
+  const wordmarkWidth = layout.wordmarkFontSize * 3.9
 
   return {
     left: `${layout.insetX - BRAND_PADDING}px`,

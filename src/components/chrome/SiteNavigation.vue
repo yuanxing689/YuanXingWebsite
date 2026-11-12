@@ -149,7 +149,12 @@ function forwardItemSelect(event, item) {
   top: 50%;
   z-index: 1;
   color: #d9e4ff;
-  font-size: 0.72rem;
+  font-family: 'Smiley Sans', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  /* 得意黑字身窄，小字标略提字号才与原来的视觉体量相当 */
+  font-size: 0.8125rem;
+  /* 子集字体只有 Regular，声明字重避免小字号下被合成粗体 */
+  font-weight: 400;
+  font-synthesis: none;
   letter-spacing: 0.08em;
   white-space: nowrap;
   text-shadow: 0 1px 10px rgba(3, 7, 20, 0.98), 0 0 18px rgba(107, 159, 255, 0.7);
@@ -197,7 +202,7 @@ function forwardItemSelect(event, item) {
     left: 50%;
     bottom: calc(100% - 2px);
     transform: translateX(-50%);
-    font-size: 0.62rem;
+    font-size: 0.7rem;
     letter-spacing: 0.02em;
   }
 }
