@@ -2,6 +2,7 @@
 type: game
 id: Silverstone
 title: 银石镇
+titleTemplate: true
 description: 银石镇（Silverstone）汉化Wiki
 status: translating
 order: 60

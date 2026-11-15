@@ -16,7 +16,7 @@ const sitemapHostname = new URL(
   `${siteOrigin}/`
 ).href
 
-const SITE_TITLE = '元星联邦'
+const SITE_TITLE = '元星联邦汉化组'
 const SITE_DESCRIPTION =
   '元星联邦汉化组——一个独立兽人视觉小说的中文本地化组织'
 // 站点图标在 public 目录里的路径：favicon 用相对 base 的写法，

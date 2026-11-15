@@ -2,6 +2,7 @@
 type: game
 id: UNDER|HEAVEN
 title: 天堂下
+titleTemplate: true
 description: 天堂下（Under | Haven）汉化Wiki
 status: translating
 order: 20

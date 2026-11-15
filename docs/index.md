@@ -1,5 +1,7 @@
 ---
-title: 元星联邦
+title: 元星联邦汉化组 · YXLB
+# 关闭站点名自动后缀；标题完全由上一行的 title 决定，写什么显示什么
+titleTemplate: false
 description: 元星联邦汉化组——一个独立兽人视觉小说的中文本地化组织
 ---
 

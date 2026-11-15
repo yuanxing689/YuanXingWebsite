@@ -51,7 +51,7 @@ const emit = defineEmits(['brand-select'])
     <img
       class="brand-home__mark"
       :src="markSrc"
-      alt=""
+      alt="元星联邦"
       aria-hidden="true"
       decoding="async"
     />
