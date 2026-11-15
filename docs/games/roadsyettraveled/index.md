@@ -2,6 +2,7 @@
 type: game
 id: roadsyettraveled
 title: 未行之途
+titleTemplate: true
 description: 未行之途（Roads Yet Traveled）汉化Wiki
 status: translating
 order: 10

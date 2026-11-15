@@ -2,6 +2,7 @@
 type: game
 id: FELICITY
 title: FELICITY
+titleTemplate: true
 description: FELICITY，一个微恐FVN
 status: translating
 order: 40

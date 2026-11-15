@@ -35,6 +35,7 @@ docs/games/
 type: game
 id: example-game
 title: 示例游戏
+titleTemplate: true
 description: 一句话介绍这个游戏。
 status: translating
 order: 20
@@ -48,7 +49,8 @@ draft: false
 | `type` | 是 | 必须是 `game`，否则不会进入首页游戏目录。 |
 | `id` | 是 | 全站唯一标识，用于导航状态、共享元素和后续数据关联。 |
 | `title` | 是 | 首页卡片、详情页头部和浏览器标题使用的游戏名称。 |
-| `description` | 建议 | 游戏简介；数据加载器会保留该字段。 |
+| `titleTemplate` | 可选 | 浏览器标题是否拼接站点名：`true` 得到「游戏名 | 元星联邦汉化组」，`false` 只保留游戏名；不写时按站点默认（拼接）。 |
+| `description` | 建议 | 游戏简介，会作为搜索结果摘要和 `og:description`。 |
 | `status` | 建议 | 汉化状态，映射为页面显示文字。 |
 | `order` | 是 | 游戏卡片顺序，数值越小越靠前；建议使用 `10`、`20`、`30`。 |
 | `cover` | 可选 | 游戏封面站点绝对路径；缺失时显示星形占位。 |
@@ -81,6 +83,7 @@ draft: false
 type: game
 id: example-game
 title: 示例游戏
+titleTemplate: true
 description: 一句话介绍这个游戏。
 status: translating
 order: 20
