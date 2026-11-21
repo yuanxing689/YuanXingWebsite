@@ -130,4 +130,5 @@ export default defineConfig({
   themeConfig: {
     outline: false
   }
+  
 })
