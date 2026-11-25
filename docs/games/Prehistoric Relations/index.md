@@ -1,9 +1,9 @@
 ---
 type: game
-id: roadsyettraveled
-title: 史前关系
+id: Prehistoric Relations
+title: 史前之恋
 titleTemplate: true
-description: 史前关系（Prehistoric Relations）汉化Wiki
+description: 史前之恋（Prehistoric Relations）汉化Wiki
 status: translating
 order: 70
 cover: /images/games/PR.webp

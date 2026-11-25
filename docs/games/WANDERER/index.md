@@ -4,7 +4,7 @@ id: WANDERER
 title: 游荡者
 titleTemplate: true
 description: 游荡者（WANDERED）汉化Wiki
-status: translating
+status: released
 order: 50
 cover: /images/games/游荡者.webp
 draft: false
@@ -26,3 +26,22 @@ draft: false
 然而，Elias Carrasco不知道的是，《游荡者》将坐在他身边，但……
 
 警告：本游戏包含敏感主题、血腥场面和闪烁灯光。
+
+## 1版本说明：
+1. 翻译至最新版本
+2. 修复了已知错误  
+3. 翻译仅供玩家参考交流，不代表当前汉化的最高品质。如遇错字、病句、译文偏离原意或严重失真请QQ反馈
+
+## 汉化
+
+- 翻译：Fin无名，hank
+- 校对：hank
+- 程序处理：Fin无名，雨笋
+- 当前汉化版本：1
+
+::: media-strip 4
+[![itch.io](/images/home/itch-io.webp)](https://xptitloupx.itch.io/the-wanderer)
+[![红p](/images/home/Patreon-logo.webp)](https://www.patreon.com/cw/Ptitloup?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink)
+[![x](/images/home/x.webp)](https://x.com/xPtitloupx)
+[![discord](/images/home/discord.webp)](https://discord.com/invite/YcHwkNjemn)
+:::
