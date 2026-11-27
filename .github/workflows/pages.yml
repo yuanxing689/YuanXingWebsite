@@ -14,25 +14,31 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+# 站点公开信息：不放 secret，进版本控制才能追踪变更
 env:
   SITE_ORIGIN: https://ourselves.cv
   SITE_BASE: /
-  ARTIFACT_NAME: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
 
 jobs:
-  build:
+  deploy:
+    # 只在主仓库部署；fork 上跳过，避免用错误的仓库地址发布
     if: github.repository == 'yuanxing689/YuanXingWebsite'
-    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    # secret 放在 job 级，step 的 if 条件才能读到 env.INDEXNOW_KEY
     env:
       INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
+          # 拉完整历史：sitemap 的 lastmod 取自每个文件的最后一次提交时间
           fetch-depth: 0
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
@@ -41,41 +47,29 @@ jobs:
         run: npm ci
 
       - name: Build site
+        # SITE_ORIGIN 和 SITE_BASE 由 workflow 级 env 注入
         run: npm run build
 
       - name: Generate IndexNow Key File
+        # secret 缺失时跳过，避免生成空文件名
         if: env.INDEXNOW_KEY != ''
-        run: printf '%s' "$INDEXNOW_KEY" > "dist/$INDEXNOW_KEY.txt"
-
-      - name: Check dist exists
-        run: test -d dist && ls -la dist || (echo "dist 目录不存在，请核对 npm run build 的输出目录"; exit 1)
+        run: |
+          printf '%s' "$INDEXNOW_KEY" > "dist/$INDEXNOW_KEY.txt"
 
       - name: Configure Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: dist
-          name: ${{ env.ARTIFACT_NAME }}
 
-  deploy:
-    needs: build
-    if: github.repository == 'yuanxing689/YuanXingWebsite'
-    runs-on: ubuntu-latest
-    env:
-      INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
-        with:
-          artifact_name: ${{ env.ARTIFACT_NAME }}
+        uses: actions/deploy-pages@v5
 
       - name: Submit URLs to IndexNow
+        # 部署完成后再推送；key 缺失时整步跳过
         if: env.INDEXNOW_KEY != ''
         uses: bojieyang/indexnow-action@v3
         with:
