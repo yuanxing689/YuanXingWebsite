@@ -58,12 +58,12 @@ draft: false
 - 翻译：参考游戏内人员表。
 - 校对：参考游戏内人员表。
 - 程序处理：参考游戏内人员表。
-- 当前Windows补丁：<a class="dl-btn" href="./images/Windows汉化补丁v11.zip" download>
+- 当前Windows补丁：<a class="dl-btn" href="/downloads/rytWindows汉化补丁v11.zip" download>
       <span class="dl-btn__icon">⬇</span>
       <span class="dl-btn__text">下载汉化补丁 v11</span>
     </a>
 
-- 当前安卓汉化版本：<a class="dl-btn" href="./images/安卓v11.zip" download>
+- 当前安卓汉化版本：<a class="dl-btn" href="/downloads/ryt安卓V11.zip" download>
       <span class="dl-btn__icon">⬇</span>
       <span class="dl-btn__text">下载汉化补丁 v11</span>
     </a>
