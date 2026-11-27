@@ -15,3 +15,4 @@ export default {
 if (typeof window !== 'undefined') {
   installHistoryTraversalCapture()
 }
+
