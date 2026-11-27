@@ -58,7 +58,15 @@ draft: false
 - 翻译：参考游戏内人员表。
 - 校对：参考游戏内人员表。
 - 程序处理：参考游戏内人员表。
+- 当前Windows补丁：<a class="dl-btn" href="https://github.com/yuanxing689/YuanXingWebsite/releases/download/ryt/rytWindowsV11.zip">
+  <span class="dl-btn__icon">⬇</span>
+  <span class="dl-btn__text">下载 Windows 汉化补丁 v11</span>
+</a>
 
+- 当前安卓汉化版本：<a class="dl-btn" href="https://github.com/yuanxing689/YuanXingWebsite/releases/download/ryt/V11.zip">
+  <span class="dl-btn__icon">⬇</span>
+  <span class="dl-btn__text">下载安卓汉化补丁 v11</span>
+</a>
 
 
 
