@@ -17,14 +17,14 @@ concurrency:
 env:
   SITE_ORIGIN: https://ourselves.cv
   SITE_BASE: /
-  # artifact 名带 run_attempt，保证每次重跑唯一，避免同名冲突
   ARTIFACT_NAME: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
 
 jobs:
-  # ============ 构建 + 上传 ============
   build:
     if: github.repository == 'yuanxing689/YuanXingWebsite'
     runs-on: ubuntu-latest
+    env:
+      INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,12 +44,9 @@ jobs:
         run: npm run build
 
       - name: Generate IndexNow Key File
-        if: ${{ secrets.INDEXNOW_KEY != '' }}
-        env:
-          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+        if: env.INDEXNOW_KEY != ''
         run: printf '%s' "$INDEXNOW_KEY" > "dist/$INDEXNOW_KEY.txt"
 
-      # 上传前先确认产物目录存在，避免上传空目录导致 deploy 找不到
       - name: Check dist exists
         run: test -d dist && ls -la dist || (echo "dist 目录不存在，请核对 npm run build 的输出目录"; exit 1)
 
@@ -62,11 +59,12 @@ jobs:
           path: dist
           name: ${{ env.ARTIFACT_NAME }}
 
-  # ============ 部署（依赖 build）============
   deploy:
     needs: build
     if: github.repository == 'yuanxing689/YuanXingWebsite'
     runs-on: ubuntu-latest
+    env:
+      INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -77,11 +75,8 @@ jobs:
         with:
           artifact_name: ${{ env.ARTIFACT_NAME }}
 
-      # 部署成功后推送 IndexNow
       - name: Submit URLs to IndexNow
-        if: ${{ secrets.INDEXNOW_KEY != '' }}
-        env:
-          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+        if: env.INDEXNOW_KEY != ''
         uses: bojieyang/indexnow-action@v3
         with:
           sitemap-location: ${{ format('{0}/sitemap.xml', env.SITE_ORIGIN) }}
